@@ -14,6 +14,7 @@ import rapid.server.config.Configurable;
 import rapid.server.config.Measurable;
 
 import com.codahale.metrics.Gauge;
+import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricRegistry;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.brainlag.nsq.NSQConsumer;
@@ -32,6 +33,8 @@ public class NSQFirehose extends RapidFirehose
     private NSQFirehoseConfig nsqConfig;
 
     private BlockingQueue<NSQMessage> blockingQueue = new LinkedBlockingQueue<>();
+    
+    private Meter eventConsumpMeter = null;
 
     public NSQFirehose() {
         this.nsqLookup = new DefaultNSQLookup();
@@ -112,7 +115,7 @@ public class NSQFirehose extends RapidFirehose
         try {
             final NSQMessage message = blockingQueue.take();
             message.finished();
-
+            eventConsumpMeter.mark();
             return new RapidFirehoseMessage() {
                 @Override
                 public String offset() {
@@ -140,6 +143,7 @@ public class NSQFirehose extends RapidFirehose
 
 	@Override
 	public void registerMetrics(MetricRegistry metricRegistry) {
-		metricRegistry.register("firehose.nsq.queue.size", (Gauge<Integer>) () -> blockingQueue.size());		
+		metricRegistry.register("firehose.nsq.queue.size", (Gauge<Integer>) () -> blockingQueue.size());
+		eventConsumpMeter = metricRegistry.meter("firehose.nsq.consumption");
 	}
 }
