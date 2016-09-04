@@ -38,6 +38,8 @@ public class HttpFirehose extends RapidFirehose implements Configurable, Measura
   private byte[] nextData;
 
   private Meter blockMeter = null;
+  private Meter bytesMeter = null;
+  private Meter requestMeter = null;
   
   private AtomicBoolean drained = new AtomicBoolean(false);
 
@@ -159,6 +161,7 @@ public class HttpFirehose extends RapidFirehose implements Configurable, Measura
   {
     port(port);
     post("/insert", (request, response) -> {
+      requestMeter.mark();
       if (queue.size() >= DEFAULT_MAX_BUFFER_SIZE) {
         response.status(403);
         if (blockMeter != null) {
@@ -167,8 +170,9 @@ public class HttpFirehose extends RapidFirehose implements Configurable, Measura
         return "block";
       }
       
-      byte[] dataBlock = request.bodyAsBytes();
+      byte[] dataBlock = request.bodyAsBytes();      
       if (dataBlock != null && dataBlock.length > 0) {
+        bytesMeter.mark(dataBlock.length);
         byte[][] dataList = decompose(dataBlock);
       
         for (byte[] dataElement : dataList) {
@@ -185,5 +189,7 @@ public class HttpFirehose extends RapidFirehose implements Configurable, Measura
   {
     metricRegistry.register("firehose.http.queue.size", (Gauge<Integer>) () -> queue.size());
     blockMeter = metricRegistry.meter("firehose.http.block");
+    bytesMeter = metricRegistry.meter("firehose.http.bytes.read");
+    requestMeter = metricRegistry.meter("firehose.http.requests");
   }
 }
