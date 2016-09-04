@@ -1,0 +1,7 @@
+{
+    "clazz": "io.dashbase.firehose.nsq.NSQFirehose",
+    "params": {
+        "channel": "dashbase",
+        "topic": "test"
+    }
+}
