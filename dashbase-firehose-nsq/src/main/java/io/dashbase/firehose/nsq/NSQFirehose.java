@@ -35,6 +35,8 @@ public class NSQFirehose extends RapidFirehose
     private BlockingQueue<NSQMessage> blockingQueue = new LinkedBlockingQueue<>();
     
     private Meter eventConsumpMeter = null;
+    private Meter eventProduceMeter = null;
+    
 
     public NSQFirehose() {
         this.nsqLookup = new DefaultNSQLookup();
@@ -58,6 +60,7 @@ public class NSQFirehose extends RapidFirehose
                         logger.debug("consumer msg: {}", new String(message.getMessage()));
                 	  }
                       blockingQueue.put(message);
+                      eventProduceMeter.mark();
                   } catch (InterruptedException e) {
                       logger.error("Interrupted while enqueueing message", e);
                       Thread.currentThread().interrupt();
@@ -144,6 +147,7 @@ public class NSQFirehose extends RapidFirehose
 	@Override
 	public void registerMetrics(MetricRegistry metricRegistry) {
 		metricRegistry.register("firehose.nsq.queue.size", (Gauge<Integer>) () -> blockingQueue.size());
-		eventConsumpMeter = metricRegistry.meter("firehose.nsq.consumption");
+		eventConsumpMeter = metricRegistry.meter("firehose.nsq.consume");
+	    eventProduceMeter = metricRegistry.meter("firehose.jsq.produce");
 	}
 }

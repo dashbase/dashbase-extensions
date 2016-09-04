@@ -40,7 +40,8 @@ public class HttpFirehose extends RapidFirehose implements Configurable, Measura
   private Meter blockMeter = null;
   private Meter bytesMeter = null;
   private Meter requestMeter = null;
-  private Meter eventConsumpMeter = null;
+  private Meter eventConsumeMeter = null;
+  private Meter eventProduceMeter = null;
   
   private AtomicBoolean drained = new AtomicBoolean(false);
 
@@ -92,7 +93,7 @@ public class HttpFirehose extends RapidFirehose implements Configurable, Measura
           }
         };
 
-        eventConsumpMeter.mark();
+        eventConsumeMeter.mark();
         return msg;
       }
     };
@@ -177,8 +178,9 @@ public class HttpFirehose extends RapidFirehose implements Configurable, Measura
         bytesMeter.mark(dataBlock.length);
         byte[][] dataList = decompose(dataBlock);
       
-        for (byte[] dataElement : dataList) {
+        for (byte[] dataElement : dataList) {          
           queue.add(transform(dataElement));
+          eventProduceMeter.mark();
         }
       }
       return "ok";
@@ -193,6 +195,7 @@ public class HttpFirehose extends RapidFirehose implements Configurable, Measura
     blockMeter = metricRegistry.meter("firehose.http.block");
     bytesMeter = metricRegistry.meter("firehose.http.bytes.read");
     requestMeter = metricRegistry.meter("firehose.http.requests");
-    eventConsumpMeter = metricRegistry.meter("firehose.http.consumption");
+    eventConsumeMeter = metricRegistry.meter("firehose.http.consume");
+    eventProduceMeter = metricRegistry.meter("firehose.http.produce");
   }
 }
