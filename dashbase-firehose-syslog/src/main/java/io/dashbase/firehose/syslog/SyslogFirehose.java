@@ -134,7 +134,7 @@ public class SyslogFirehose extends RapidFirehose implements Configurable, Measu
     syslogServerConfig.addEventHandler(eventHandler);
 
     threadedInstance = SyslogServer.getThreadedInstance(protocol);
-    logger.info("syslog firehose started");
+    logger.info("syslog firehose started");    
 	}
 
 	@Override
@@ -142,12 +142,15 @@ public class SyslogFirehose extends RapidFirehose implements Configurable, Measu
 	  logger.info("shutting down syslog firehose");
 	  try {
 	    if (threadedInstance != null) {
+	      threadedInstance.shutdown();
         threadedInstance.getThread().join();
-	    }
+	    }	    
     } catch (InterruptedException e) {
       logger.warn("Interrupted while joining syslog server thread", e);
       Thread.currentThread().interrupt();
     }
+	  logger.info("syslog listener shutdown");
+	  logger.info("waiting for items in the queue to be ingested.");
 	  int queueSize;
     int countDown = 5;
     while ((queueSize = queue.size()) > 0 && countDown > 0) {
