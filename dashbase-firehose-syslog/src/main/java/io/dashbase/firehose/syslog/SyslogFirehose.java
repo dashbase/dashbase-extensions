@@ -45,6 +45,8 @@ public class SyslogFirehose extends RapidFirehose implements Configurable, Measu
   private Meter eventConsumeMeter = null;
   private Meter eventProduceMeter = null;
   
+  private SyslogServerIF threadedInstance = null;
+  
 	public SyslogFirehose() {
 	}
 
@@ -121,6 +123,7 @@ public class SyslogFirehose extends RapidFirehose implements Configurable, Measu
 
 	@Override
 	public void start() throws Exception {
+	  logger.info("starting syslog firehose");
 	  final SyslogServerIF syslogServer = SyslogServer.getInstance(protocol);
 
     final SyslogServerConfigIF syslogServerConfig = syslogServer.getConfig();
@@ -130,18 +133,21 @@ public class SyslogFirehose extends RapidFirehose implements Configurable, Measu
     SyslogServerEventHandlerIF eventHandler = new SyslogServerEventHandler(queue);
     syslogServerConfig.addEventHandler(eventHandler);
 
-    final SyslogServerIF threadedInstance = SyslogServer.getThreadedInstance(protocol);
-
-    try {
-        threadedInstance.getThread().join();
-    } catch (InterruptedException e) {
-        logger.warn("Interrupted while joining syslog server thread", e);
-        Thread.currentThread().interrupt();
-    }
+    threadedInstance = SyslogServer.getThreadedInstance(protocol);
+    logger.info("syslog firehose started");
 	}
 
 	@Override
-	public void shutdown() throws Exception {	
+	public void shutdown() throws Exception {
+	  logger.info("shutting down syslog firehose");
+	  try {
+	    if (threadedInstance != null) {
+        threadedInstance.getThread().join();
+	    }
+    } catch (InterruptedException e) {
+      logger.warn("Interrupted while joining syslog server thread", e);
+      Thread.currentThread().interrupt();
+    }
 	  int queueSize;
     int countDown = 5;
     while ((queueSize = queue.size()) > 0 && countDown > 0) {
