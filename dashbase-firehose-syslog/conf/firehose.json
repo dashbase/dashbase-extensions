@@ -1,0 +1,8 @@
+{
+	"clazz" : "io.dashbase.firehose.syslog.SyslogFirehose",
+	"params" : {
+	  "host" : "127.0.0.1",
+	  "port" : 32376,
+	  "protocol" : "udp"
+	}
+}
