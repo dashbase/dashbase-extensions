@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>io.dashbase.extensions</groupId>
-  <artifactId>dashbse-firehose-nsq</artifactId>
+  <artifactId>dashbase-firehose-nsq</artifactId>
   <version>0.0.1-SNAPSHOT</version>
   <packaging>jar</packaging>
   <name>Dashbase Firehose Extension for NSQ</name>
