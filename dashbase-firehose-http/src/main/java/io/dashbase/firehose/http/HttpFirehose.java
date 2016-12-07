@@ -5,7 +5,6 @@ import static spark.Spark.port;
 import static spark.Spark.post;
 import static spark.Spark.stop;
 
-import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -13,8 +12,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import rapid.components.AbstractServiceComponent;
 import rapid.firehose.RapidFirehose;
-import rapid.firehose.RapidFirehoseMessage;
 import rapid.server.config.Configurable;
 import rapid.server.config.Measurable;
 
@@ -23,7 +22,7 @@ import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricRegistry;
 
 
-public class HttpFirehose extends RapidFirehose implements Configurable, Measurable
+public class HttpFirehose implements RapidFirehose, Configurable, Measurable, AbstractServiceComponent
 {
   private static Logger logger = LoggerFactory.getLogger(HttpFirehose.class);
   private static final int DEFAULT_PORT = 9999;
@@ -52,51 +51,16 @@ public class HttpFirehose extends RapidFirehose implements Configurable, Measura
   }
 
   @Override
-  public boolean isDrained()
+  public byte[] next()
   {
-    return drained.get();
-  }
-
-  @Override
-  public Iterator<RapidFirehoseMessage> iterator()
-  {
-    return new Iterator<RapidFirehoseMessage>()
-    {
-
-      @Override
-      public boolean hasNext()
-      {
-        return true;
-      }
-
-      @Override
-      public RapidFirehoseMessage next()
-      {
-        try {
-          nextData = queue.take();
-        } catch (InterruptedException e) {
-          logger.warn("waiting on queue interrupted.", e);
-        }
-        
-        RapidFirehoseMessage msg = new RapidFirehoseMessage()
-        {
-          @Override
-          public String offset()
-          {
-            return null;
-          }
-
-          @Override
-          public byte[] data()
-          {
-            return nextData;
-          }
-        };
-
-        eventConsumeMeter.mark();
-        return msg;
-      }
-    };
+    try {
+      byte[] data = queue.take();
+      eventConsumeMeter.mark();
+      return data;
+    } catch (InterruptedException e) {
+      logger.warn("waiting on queue interrupted.", e);
+      return null;
+    }
   }
 
   @Override

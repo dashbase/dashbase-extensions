@@ -1,11 +1,13 @@
 package io.dashbase.firehose.syslog;
 
 import java.net.SocketAddress;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.LinkedBlockingQueue;
 
+import com.codahale.metrics.Gauge;
+import com.codahale.metrics.Meter;
+import com.codahale.metrics.MetricRegistry;
 import org.graylog2.syslog4j.server.SyslogServer;
 import org.graylog2.syslog4j.server.SyslogServerConfigIF;
 import org.graylog2.syslog4j.server.SyslogServerEventHandlerIF;
@@ -14,17 +16,12 @@ import org.graylog2.syslog4j.server.SyslogServerIF;
 import org.graylog2.syslog4j.server.SyslogServerSessionEventHandlerIF;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
+import rapid.components.AbstractServiceComponent;
 import rapid.firehose.RapidFirehose;
-import rapid.firehose.RapidFirehoseMessage;
 import rapid.server.config.Configurable;
 import rapid.server.config.Measurable;
 
-import com.codahale.metrics.Gauge;
-import com.codahale.metrics.Meter;
-import com.codahale.metrics.MetricRegistry;
-
-public class SyslogFirehose extends RapidFirehose implements Configurable, Measurable {
+public class SyslogFirehose implements RapidFirehose, Configurable, Measurable, AbstractServiceComponent {
 
   private static Logger logger = LoggerFactory.getLogger(SyslogFirehose.class);
   private String protocol = "udp";
@@ -37,8 +34,7 @@ public class SyslogFirehose extends RapidFirehose implements Configurable, Measu
   
   // unbounded, will let the server control the size
   private final LinkedBlockingQueue<byte[]> queue = new LinkedBlockingQueue<>(DEFAULT_MAX_BUFFER_SIZE);
-  private byte[] nextData;
-  
+
   private Meter blockMeter = null;
   private Meter bytesMeter = null;
   private Meter requestMeter = null;
@@ -80,46 +76,17 @@ public class SyslogFirehose extends RapidFirehose implements Configurable, Measu
 	  }    
 	}
 
-	@Override
-	public Iterator<RapidFirehoseMessage> iterator() {
-	  return new Iterator<RapidFirehoseMessage>()
-    {
-
-      @Override
-      public boolean hasNext()
-      {
-        return true;
-      }
-
-      @Override
-      public RapidFirehoseMessage next()
-      {
+    @Override
+    public byte[] next() {
         try {
-          nextData = queue.take();
-        } catch (InterruptedException e) {
-          logger.warn("waiting on queue interrupted.", e);
-        }
-        
-        RapidFirehoseMessage msg = new RapidFirehoseMessage()
-        {
-          @Override
-          public String offset()
-          {
-            return null;
-          }
-
-          @Override
-          public byte[] data()
-          {
+            byte[] nextData = queue.take();
+            eventConsumeMeter.mark();
             return nextData;
-          }
-        };
-
-        eventConsumeMeter.mark();
-        return msg;
-      }
-    };
-	}
+        } catch (InterruptedException e) {
+            logger.warn("waiting on queue interrupted.", e);
+            return null;
+        }
+    }
 
 	@Override
 	public void start() throws Exception {
@@ -134,7 +101,7 @@ public class SyslogFirehose extends RapidFirehose implements Configurable, Measu
     syslogServerConfig.addEventHandler(eventHandler);
 
     threadedInstance = SyslogServer.getThreadedInstance(protocol);
-    logger.info("syslog firehose started");    
+    logger.info("syslog firehose started");
 	}
 
 	@Override

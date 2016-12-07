@@ -1,17 +1,8 @@
 package io.dashbase.firehose.nsq;
 
-import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import rapid.firehose.RapidFirehose;
-import rapid.firehose.RapidFirehoseMessage;
-import rapid.server.config.Configurable;
-import rapid.server.config.Measurable;
 
 import com.codahale.metrics.Gauge;
 import com.codahale.metrics.Meter;
@@ -22,9 +13,14 @@ import com.github.brainlag.nsq.NSQMessage;
 import com.github.brainlag.nsq.lookup.DefaultNSQLookup;
 import com.github.brainlag.nsq.lookup.NSQLookup;
 import com.google.common.base.Preconditions;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import rapid.components.AbstractServiceComponent;
+import rapid.firehose.RapidFirehose;
+import rapid.server.config.Configurable;
+import rapid.server.config.Measurable;
 
-public class NSQFirehose extends RapidFirehose
-      implements Configurable, Measurable, Iterator<RapidFirehoseMessage> {
+public class NSQFirehose implements RapidFirehose, Configurable, Measurable, AbstractServiceComponent {
     private static final Logger logger = LoggerFactory.getLogger(NSQFirehose.class);
 
     private final NSQLookup nsqLookup;
@@ -40,11 +36,6 @@ public class NSQFirehose extends RapidFirehose
 
     public NSQFirehose() {
         this.nsqLookup = new DefaultNSQLookup();
-    }
-
-    @Override
-    public Iterator<RapidFirehoseMessage> iterator() {
-        return this;
     }
 
     @Override
@@ -109,33 +100,16 @@ public class NSQFirehose extends RapidFirehose
     }
 
     @Override
-    public boolean hasNext() {
-        return true;
-    }
-
-    @Override
-    public RapidFirehoseMessage next() {
+    public byte[] next() {
         try {
             final NSQMessage message = blockingQueue.take();
             message.finished();
             eventConsumpMeter.mark();
-            return new RapidFirehoseMessage() {
-                @Override
-                public String offset() {
-                    // Offset is not supported.
-                    return null;
-                }
-
-                @Override
-                public byte[] data() {
-                    return message.getMessage();
-                }
-            };
+            return message.getMessage();
         } catch (InterruptedException e) {
             logger.error("Interrupted while taking message", e);
             Thread.currentThread().interrupt();
         }
-
         return null;
     }
 
