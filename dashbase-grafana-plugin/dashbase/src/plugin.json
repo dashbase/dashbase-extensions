@@ -1,0 +1,26 @@
+{
+  "type": "datasource",
+  "name": "Dashbase",
+  "id": "dashbase",
+
+  "info": {
+    "description": "Dashbase Data Source for Grafana",
+    "author": {
+      "name": "Dashbase Inc.",
+      "url": "http://www.dashbase.io"
+    },
+    "keywords": ["dashbase"],
+    "logos": {
+      "small": "img/_dashbase73x73.png",
+      "large": "img/_dashbase400x400.png"
+    },
+    "links": [
+      {"name": "dashbase.io", "url": "http://www.dashbase.io"}
+    ],
+    "version": "1.0.0",
+    "updated": "2017-01-05"
+  },
+
+  "annotations": false,
+  "metrics": true
+}
