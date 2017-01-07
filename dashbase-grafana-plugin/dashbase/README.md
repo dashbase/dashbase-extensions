@@ -5,16 +5,17 @@
 [1]: https://nodejs.org/download/ 
 
 ## How To
-Download to desired {path} <b>AND</b>
+Download to desired path <b>AND</b>
 #### Grafana Source Build
-Uncomment and set `plugin = {path}` within `src/github.com/grafana/grafana/conf/custom.ini`. Copy from `sample.ini` if this file does not exist.
+Uncomment and set `plugin = /path/to/dashbase-extensions/dashbase-grafana-plugin/` within `src/github.com/grafana/grafana/conf/custom.ini`. Copy from `sample.ini` if this file does not exist.
 #### Brew
-run `grafana-cli --pluginsDir {path}` 
+run `grafana-cli --pluginsDir /path/to/dashbase-extensions/dashbase-grafana-plugin/` 
 #### Other Installations
 Refer to http://docs.grafana.org/installation/ for more details regarding where to find custom configirations directory.
 
 ### Run
 ```
+cd /path/to/dashbase-extensions/dashbase-grafana-plugin/dashbase
 npm install
 grunt
 ```
