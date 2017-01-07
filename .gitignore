@@ -2,3 +2,4 @@
 **/dependency-reduced-pom.xml
 node_modules
 *.log
+**/dist
