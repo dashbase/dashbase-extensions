@@ -3,10 +3,6 @@
   "name": "Dashbase",
   "id": "dashbase",
 
-  "partials": {
-    "config": "public/app/plugins/datasource/dashbase/partials/config.html"
-  },
-
   "info": {
     "description": "Dashbase Data Source for Grafana",
     "author": {
