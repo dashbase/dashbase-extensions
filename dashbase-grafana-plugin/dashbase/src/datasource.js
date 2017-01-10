@@ -29,6 +29,7 @@ export class DashbaseDatasource {
 		if (sentTargets.length === 0) {
 			return $q.when([]);
 		}
+		console.log(angular.toJson(options));
 		return this._post("sql", query);
 	}
 
@@ -65,7 +66,20 @@ export class DashbaseDatasource {
 
 	_post(endpoint, data) {
 		return this._request("POST", endpoint, data).then(function(results) {
-			console.log(results);
+			console.log(results.data.aggregations.ts_day.histogramBuckets[0]);
+			var histogramBucket = results.data.aggregations.ts_day.histogramBuckets[0];
+
+			var jsonResponse = { data: [
+			{
+				"target": "select ts(day)",
+				"datapoints":[
+				[histogramBucket.count,histogramBucket.timeInSec],
+				[histogramBucket.count - 1000, histogramBucket.timeInSec + 3]
+				]
+			}
+			]}
+			console.log(jsonResponse);
+			return jsonResponse;
 		});
 	}
 }
