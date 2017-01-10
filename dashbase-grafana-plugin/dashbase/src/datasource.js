@@ -50,7 +50,7 @@ export class DashbaseDatasource {
 		var options = {
 			url: this.url + "/" + endpoint,
 			method: method,
-			data: data,
+			data: data
 		}
 		if (this.basicAuth || this.withCredentials) {
 			options.withCredentials = true;
