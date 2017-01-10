@@ -73,8 +73,7 @@ export class DashbaseDatasource {
 			{
 				"target": "select ts(day)",
 				"datapoints":[
-				[histogramBucket.count,histogramBucket.timeInSec],
-				[histogramBucket.count - 1000, histogramBucket.timeInSec + 3]
+				[histogramBucket.count, new Date().getTime()]
 				]
 			}
 			]}
