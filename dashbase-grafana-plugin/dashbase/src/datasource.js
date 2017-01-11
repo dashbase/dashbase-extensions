@@ -14,9 +14,10 @@ export class DashbaseDatasource {
 
 	query(options) {
 		// options contains the request object
-		var query = "";
+		var payload = "SELECT ";
 		var target;
 		var sentTargets = [];
+		
 		// currently only supports a single query
 		for (var i = 0; i < options.targets.length; i++) {
 			target = options.targets[i];
@@ -24,12 +25,12 @@ export class DashbaseDatasource {
 				continue;
 			}
 			sentTargets.push(target);
-			query = target.target;
+			payload += target.target;
 		}
 		if (sentTargets.length === 0) {
 			return $q.when([]);
 		}
-		return this._post("sql", query);
+		return this._post("sql", payload);
 	}
 
 	metricFindQuery(options){
@@ -66,7 +67,7 @@ export class DashbaseDatasource {
 	_post(endpoint, data) {
 		return this._request("POST", endpoint, data).then(function(results) {
 			var histogramBucket = results.data.aggregations.ts_day.histogramBuckets[0];
-
+			console.log(results);
 			var jsonResponse = { data: [
 			{
 				"target": "select ts(day)",

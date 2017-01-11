@@ -6,8 +6,8 @@ export class DashbaseDatasourceQueryCtrl extends QueryCtrl {
 
 		this.scope = $scope;
 		this.uiSegmentSrv = uiSegmentSrv;
-		this.target.target = this.target.target || 'select ts(day)';
-		this.target.type = this.target.type || 'sql';
+		this.target.target = this.target.target;
+		this.target.type = this.target.type || 'SQL';
 	}
 
 	getOptions() {
@@ -15,11 +15,11 @@ export class DashbaseDatasourceQueryCtrl extends QueryCtrl {
     // Options have to be transformed by uiSegmentSrv to be usable by metric-segment-model directive
   }
 
-    toggleEditorMode() {
-    	this.target.rawQuery = !this.target.rawQuery; // show textarea vs input box
-    }
+  toggleEditorMode() {
+    this.target.rawQuery = !this.target.rawQuery; // show textarea vs input box
+  }	
 
-    onChangeInternal() {
+  refresh() {
     this.panelCtrl.refresh(); // request for panel refresh
   }
 }
