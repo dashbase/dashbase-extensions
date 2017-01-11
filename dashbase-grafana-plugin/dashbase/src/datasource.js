@@ -1,3 +1,5 @@
+import {RapidResponse} from './rapid_response';
+
 export class DashbaseDatasource {
 
 	constructor(instanceSettings, $q, backendSrv, templateSrv, timeSrv) {
@@ -17,7 +19,7 @@ export class DashbaseDatasource {
 		var payload = "SELECT ";
 		var target;
 		var sentTargets = [];
-		
+
 		// currently only supports a single query
 		for (var i = 0; i < options.targets.length; i++) {
 			target = options.targets[i];
@@ -30,12 +32,14 @@ export class DashbaseDatasource {
 		if (sentTargets.length === 0) {
 			return $q.when([]);
 		}
-		return this._post("sql", payload);
+		return this._post("sql", payload).then(function(response) {
+			return new RapidResponse(sentTargets, response).parseResponse();
+		});
 	}
 
 	metricFindQuery(options){
-		return this._request("GET", "get-info").then(function(results) {
-			// fields available from get=info endpoint
+		return this._request("GET", "get-info").then(function(response) {
+			// fields available from get-info endpoint
 		});
 	}
 
@@ -65,18 +69,6 @@ export class DashbaseDatasource {
 	}
 
 	_post(endpoint, data) {
-		return this._request("POST", endpoint, data).then(function(results) {
-			var histogramBucket = results.data.aggregations.ts_day.histogramBuckets[0];
-			console.log(results);
-			var jsonResponse = { data: [
-			{
-				"target": "select ts(day)",
-				"datapoints":[
-				[histogramBucket.count, new Date().getTime()]
-				]
-			}
-			]}
-			return jsonResponse;
-		});
+		return this._request("POST", endpoint, data);
 	}
 }
