@@ -1,4 +1,5 @@
 import {RapidResponse} from './rapid_response';
+import _ from 'lodash';
 
 export class DashbaseDatasource {
 
@@ -15,19 +16,18 @@ export class DashbaseDatasource {
 	}
 
 	query(options) {
-		// options contains the request object
-		var payload = "SELECT ";
+		// options contains the request object, targets being the list of queries on the graph
+		var payload = "";
 		var target;
-		var sentTargets = [];
+		var sentTargets = []; // keep track of requested list of queries for result matching use
 
-		// currently only supports a single query
 		for (var i = 0; i < options.targets.length; i++) {
-			target = options.targets[i];
-			if (target.hide) {
+			target = options.targets[0]; // currently only supports the first target
+			if (target.hide) { 
 				continue;
 			}
 			sentTargets.push(target);
-			payload += target.target;
+			payload = this._buildQueryString(target);
 		}
 		if (sentTargets.length === 0) {
 			return $q.when([]);
@@ -37,9 +37,12 @@ export class DashbaseDatasource {
 		});
 	}
 
-	metricFindQuery(options){
-		return this._request("GET", "get-info").then(function(response) {
-			// fields available from get-info endpoint
+	metricFindQuery(options) {
+
+		// TODO: implement metric listing query (eg. list of available hosts when query is host)
+		return this._post("sql", "").then(function(response) {
+			var result = []; // temp return empty array
+			return result;
 		});
 	}
 
@@ -49,6 +52,16 @@ export class DashbaseDatasource {
 				return { status: "success", message: "Data source is working.", title: "Success" };
 			}
 		});
+	}
+
+	_buildQueryString(target) {
+		var queryStr = "SELECT ";
+		if (!target.query) { // if no query follows the WHERE clause
+			queryStr += target.target;
+		} else {
+			queryStr += target.target + " WHERE " + target.query;
+		}
+		return queryStr;
 	}
 
 	_request(method, endpoint, data) {
