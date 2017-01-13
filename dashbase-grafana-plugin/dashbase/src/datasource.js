@@ -21,7 +21,6 @@ export class DashbaseDatasource {
 		var target;
 		var sentTargets = []; // keep track of requested list of queries for result matching use
 
-		console.log(options);
 		for (var i = 0; i < options.targets.length; i++) {
 			target = options.targets[0]; // currently only supports the first target
 			if (target.hide) { 
@@ -29,7 +28,6 @@ export class DashbaseDatasource {
 			}
 			sentTargets.push(target);
 			payload = this._buildQueryString(target, options.range);
-			console.log(payload);
 		}
 		if (sentTargets.length === 0) {
 			return $q.when([]);
