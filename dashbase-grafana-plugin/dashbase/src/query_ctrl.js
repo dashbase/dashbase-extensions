@@ -7,6 +7,8 @@ export class DashbaseDatasourceQueryCtrl extends QueryCtrl {
 		this.scope = $scope;
 		this.uiSegmentSrv = uiSegmentSrv;
 		this.target.target = this.target.target;
+		this.target.query = this.target.query || "";
+		this.target.type = "sql"; // uses the sql endpoint
 	}
 
 	getOptions() {
