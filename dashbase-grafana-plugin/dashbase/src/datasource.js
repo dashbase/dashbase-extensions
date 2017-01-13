@@ -21,13 +21,15 @@ export class DashbaseDatasource {
 		var target;
 		var sentTargets = []; // keep track of requested list of queries for result matching use
 
+		console.log(options);
 		for (var i = 0; i < options.targets.length; i++) {
 			target = options.targets[0]; // currently only supports the first target
 			if (target.hide) { 
 				continue;
 			}
 			sentTargets.push(target);
-			payload = this._buildQueryString(target);
+			payload = this._buildQueryString(target, options.range);
+			console.log(payload);
 		}
 		if (sentTargets.length === 0) {
 			return $q.when([]);
@@ -54,14 +56,12 @@ export class DashbaseDatasource {
 		});
 	}
 
-	_buildQueryString(target) {
-		var queryStr = "SELECT ";
+	_buildQueryString(target, timerange) {
 		if (!target.query) { // if no query follows the WHERE clause
-			queryStr += target.target;
+			return `SELECT ${target.target} BEFORE ${timerange.to.valueOf()} AFTER ${timerange.from.valueOf()}`;
 		} else {
-			queryStr += target.target + " WHERE " + target.query;
+			return `SELECT ${target.target} WHERE ${target.query} BEFORE ${timerange.to.valueOf()} AFTER ${timerange.from.valueOf()}`;
 		}
-		return queryStr;
 	}
 
 	_request(method, endpoint, data) {
