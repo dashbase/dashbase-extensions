@@ -66,7 +66,6 @@ export class DashbaseDatasource {
 		} else {
 			queryStr += ` WHERE ${target.query}` + timeRangeFilter;
 		}
-		console.log(queryStr);
 		return queryStr;
 	}
 
