@@ -1,5 +1,4 @@
-import {RapidResponse} from './rapid_response';
-import _ from 'lodash';
+import {RapidResponseParser} from './rapid_response_parser';
 
 export class DashbaseDatasource {
 
@@ -26,6 +25,10 @@ export class DashbaseDatasource {
 			if (target.hide) { 
 				continue;
 			}
+			if (!target.alias) { // if no alias is provided
+				target.alias = target.target;  // use sql syntax as alias
+			} // otherwise use user provided alias
+
 			sentTargets.push(target);
 			payload = this._buildQueryString(target, options.range);
 		}
@@ -33,7 +36,7 @@ export class DashbaseDatasource {
 			return $q.when([]);
 		}
 		return this._post("sql", payload).then(function(response) {
-			return new RapidResponse(sentTargets, response).parseResponse();
+			return new RapidResponseParser(response).parseGraphResponse(sentTargets);
 		});
 	}
 
@@ -55,11 +58,14 @@ export class DashbaseDatasource {
 	}
 
 	_buildQueryString(target, timerange) {
-		if (!target.query) { // if no query follows the WHERE clause
-			return `SELECT ${target.target} BEFORE ${timerange.to.valueOf()} AFTER ${timerange.from.valueOf()}`;
-		} else {
-			return `SELECT ${target.target} WHERE ${target.query} BEFORE ${timerange.to.valueOf()} AFTER ${timerange.from.valueOf()}`;
+		var queryStr = `SELECT ${target.target} AS "${target.alias}"`;
+		var timeRangeFilter = ` BEFORE ${timerange.to.valueOf()} AFTER ${timerange.from.valueOf()}`;
+	
+		if (target.query) { // if WHERE query exists
+			queryStr += ` WHERE ${target.query}`;
 		}
+		queryStr += timeRangeFilter ;
+		return queryStr;
 	}
 
 	_request(method, endpoint, data) {
