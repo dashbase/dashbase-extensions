@@ -61,11 +61,10 @@ export class DashbaseDatasource {
 		var queryStr = `SELECT ${target.target} AS "${target.alias}"`;
 		var timeRangeFilter = ` BEFORE ${timerange.to.valueOf()} AFTER ${timerange.from.valueOf()}`;
 	
-		if (!target.query) { // if no query follows the WHERE clause
-			queryStr += timeRangeFilter ;
-		} else {
-			queryStr += ` WHERE ${target.query}` + timeRangeFilter;
+		if (target.query) { // if WHERE query exists
+			queryStr += ` WHERE ${target.query}`;
 		}
+		queryStr += timeRangeFilter ;
 		return queryStr;
 	}
 
