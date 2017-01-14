@@ -1,5 +1,4 @@
-import {RapidResponse} from './rapid_response';
-import _ from 'lodash';
+import {RapidResponseParser} from './rapid_response_parser';
 
 export class DashbaseDatasource {
 
@@ -37,7 +36,7 @@ export class DashbaseDatasource {
 			return $q.when([]);
 		}
 		return this._post("sql", payload).then(function(response) {
-			return new RapidResponse(sentTargets, response).parseGraphResponse(sentTargets);
+			return new RapidResponseParser(sentTargets, response).parseGraphResponse(sentTargets);
 		});
 	}
 
