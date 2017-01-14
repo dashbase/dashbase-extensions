@@ -33,7 +33,7 @@ export class DashbaseDatasource {
 			return $q.when([]);
 		}
 		return this._post("sql", payload).then(function(response) {
-			return new RapidResponse(sentTargets, response).parseResponse();
+			return new RapidResponse(sentTargets, response).parseGraphResponse(sentTargets);
 		});
 	}
 
@@ -55,11 +55,21 @@ export class DashbaseDatasource {
 	}
 
 	_buildQueryString(target, timerange) {
-		if (!target.query) { // if no query follows the WHERE clause
-			return `SELECT ${target.target} BEFORE ${timerange.to.valueOf()} AFTER ${timerange.from.valueOf()}`;
+		var queryStr = `SELECT ${target.target}`;
+		var timeRangeFilter = ` BEFORE ${timerange.to.valueOf()} AFTER ${timerange.from.valueOf()}`;
+		
+		if (!target.alias) { // if no alias is provided
+			queryStr += ` AS "${target.target}"`;
 		} else {
-			return `SELECT ${target.target} WHERE ${target.query} BEFORE ${timerange.to.valueOf()} AFTER ${timerange.from.valueOf()}`;
+			queryStr += ` AS "${target.alias}"`;
 		}
+		if (!target.query) { // if no query follows the WHERE clause
+			queryStr += timeRangeFilter ;
+		} else {
+			queryStr += ` WHERE ${target.query}` + timeRangeFilter;
+		}
+		console.log(queryStr);
+		return queryStr;
 	}
 
 	_request(method, endpoint, data) {
