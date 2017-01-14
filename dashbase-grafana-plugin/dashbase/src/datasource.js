@@ -16,7 +16,6 @@ export class DashbaseDatasource {
 
 	query(options) {
 		// options contains the request object, targets being the list of queries on the graph
-		console.log(options);
 		var payload = "";
 		var target;
 		var sentTargets = []; // keep track of requested list of queries for result matching use
@@ -32,7 +31,6 @@ export class DashbaseDatasource {
 
 			sentTargets.push(target);
 			payload = this._buildQueryString(target, options.range);
-			console.log(payload);
 		}
 		if (sentTargets.length === 0) {
 			return $q.when([]);
