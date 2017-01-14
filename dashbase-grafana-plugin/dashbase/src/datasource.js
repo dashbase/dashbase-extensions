@@ -16,6 +16,7 @@ export class DashbaseDatasource {
 
 	query(options) {
 		// options contains the request object, targets being the list of queries on the graph
+		console.log(options);
 		var payload = "";
 		var target;
 		var sentTargets = []; // keep track of requested list of queries for result matching use
@@ -31,6 +32,7 @@ export class DashbaseDatasource {
 
 			sentTargets.push(target);
 			payload = this._buildQueryString(target, options.range);
+			console.log(payload);
 		}
 		if (sentTargets.length === 0) {
 			return $q.when([]);
@@ -59,7 +61,7 @@ export class DashbaseDatasource {
 
 	_buildQueryString(target, timerange) {
 		var queryStr = `SELECT ${target.target} AS "${target.alias}"`;
-		var timeRangeFilter = ` BEFORE ${timerange.to.valueOf()} AFTER ${timerange.from.valueOf()}`;
+		var timeRangeFilter = ` BEFORE ${timerange.to.unix()} AFTER ${timerange.from.unix()}`; // time in seconds
 	
 		if (target.query) { // if WHERE query exists
 			queryStr += ` WHERE ${target.query}`;
