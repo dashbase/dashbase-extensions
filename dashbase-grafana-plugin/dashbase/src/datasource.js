@@ -59,7 +59,7 @@ export class DashbaseDatasource {
 
 	_buildQueryString(target, timerange) {
 		var queryStr = `SELECT ${target.target} AS "${target.alias}"`;
-		var timeRangeFilter = ` BEFORE ${timerange.to.valueOf()} AFTER ${timerange.from.valueOf()}`;
+		var timeRangeFilter = ` BEFORE ${timerange.to.unix()} AFTER ${timerange.from.unix()}`; // time in seconds
 	
 		if (target.query) { // if WHERE query exists
 			queryStr += ` WHERE ${target.query}`;

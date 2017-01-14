@@ -22,7 +22,7 @@ export class RapidResponseParser {
 				dataArr.push({
 					"target": sentTargets[i].alias,
 					"datapoints": _.map(buckets, bucket => {
-						return [bucket.count, bucket.timeInSec * 1000]// convert sec to ms
+						return [bucket.count, bucket.timeInSec * 1000]
 					}) 
 				});
 			}
