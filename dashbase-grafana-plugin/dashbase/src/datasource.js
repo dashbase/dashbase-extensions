@@ -36,7 +36,7 @@ export class DashbaseDatasource {
 			return $q.when([]);
 		}
 		return this._post("sql", payload).then(function(response) {
-			return new RapidResponseParser(sentTargets, response).parseGraphResponse(sentTargets);
+			return new RapidResponseParser(response).parseGraphResponse(sentTargets);
 		});
 	}
 
