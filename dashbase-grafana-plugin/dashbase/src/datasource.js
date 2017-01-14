@@ -26,6 +26,10 @@ export class DashbaseDatasource {
 			if (target.hide) { 
 				continue;
 			}
+			if (!target.alias) { // if no alias is provided
+				target.alias = target.target;  // use sql syntax as alias
+			} // otherwise use user provided alias
+
 			sentTargets.push(target);
 			payload = this._buildQueryString(target, options.range);
 		}
@@ -55,14 +59,9 @@ export class DashbaseDatasource {
 	}
 
 	_buildQueryString(target, timerange) {
-		var queryStr = `SELECT ${target.target}`;
+		var queryStr = `SELECT ${target.target} AS "${target.alias}"`;
 		var timeRangeFilter = ` BEFORE ${timerange.to.valueOf()} AFTER ${timerange.from.valueOf()}`;
-		
-		if (!target.alias) { // if no alias is provided
-			queryStr += ` AS "${target.target}"`;
-		} else {
-			queryStr += ` AS "${target.alias}"`;
-		}
+	
 		if (!target.query) { // if no query follows the WHERE clause
 			queryStr += timeRangeFilter ;
 		} else {
