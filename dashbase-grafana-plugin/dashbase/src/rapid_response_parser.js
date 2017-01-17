@@ -5,7 +5,7 @@ export class RapidResponseParser {
 		this.response = response;
 	}
 
-	parseGraphResponse(sentTargets) {
+	parseResponse(sentTargets) {
 		var target;
 		var dataArr = [];
 		if (this.response.data.error) {
@@ -15,16 +15,20 @@ export class RapidResponseParser {
 			return this.response;
 		}
 		for (var i = 0; i < sentTargets.length; i++) {
-			target = this.response.data.aggregations[sentTargets[0].alias]; // change to i for when implementing support for multi queries per graph
-			if (!target) return this.response; // no response from bad query
-			if (target.histogramBuckets) {
-				var buckets = target.histogramBuckets;
-				dataArr.push({
-					"target": sentTargets[i].alias,
-					"datapoints": _.map(buckets, bucket => {
-						return [bucket.count, bucket.timeInSec * 1000]
-					}) 
-				});
+			if (sentTargets[i].type == "timeseries") {
+				target = this.response.data.aggregations[sentTargets[0].alias]; // change to i for when implementing support for multi queries per graph
+				if (!target) return this.response; // no response from bad query
+				if (target.histogramBuckets) {
+					var buckets = target.histogramBuckets;
+					dataArr.push({
+						"target": sentTargets[i].alias,
+						"datapoints": _.map(buckets, bucket => {
+							return [bucket.count, bucket.timeInSec * 1000]
+						}) 
+					});
+				}
+			} else {
+				target = this.response.data.hits;
 			}
 		}
 		this.response.data = dataArr;
