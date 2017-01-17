@@ -14,22 +14,48 @@ export class RapidResponseParser {
 			console.log(this.response.data.error); // log out parse error
 			return this.response;
 		}
-		for (var i = 0; i < sentTargets.length; i++) {
-			if (sentTargets[i].type == "timeseries") {
-				target = this.response.data.aggregations[sentTargets[0].alias]; // change to i for when implementing support for multi queries per graph
-				if (!target) return this.response; // no response from bad query
-				if (target.histogramBuckets) {
-					var buckets = target.histogramBuckets;
-					dataArr.push({
-						"target": sentTargets[i].alias,
-						"datapoints": _.map(buckets, bucket => {
-							return [bucket.count, bucket.timeInSec * 1000]
-						}) 
-					});
-				}
-			} else {
-				target = this.response.data.hits;
+		if (sentTargets[0].type == "timeseries") { // graph format
+			target = this.response.data.aggregations[sentTargets[0].alias]; // change to i for when implementing support for multi queries per graph
+			if (!target) return this.response; // no response from bad query
+			if (target.histogramBuckets) {
+				var buckets = target.histogramBuckets;
+				dataArr.push({
+					"target": sentTargets[0].alias,
+					"datapoints": _.map(buckets, bucket => {
+						return [bucket.count, bucket.timeInSec * 1000]
+					}) 
+				});
 			}
+		} else { // table format
+			var hits = this.response.data.hits;
+			dataArr = [{
+				"columns": [
+				{
+					"text": "DATE",
+					"type": "date",
+					"sort": true,
+					"desc": true,
+				},
+				{
+					"text": "RESPONSE"
+				},
+				{
+					"text": "HOST"
+				},
+				{
+					"text": "BYTESSENT",
+					"sort": true
+				},
+				{
+					"text": "RAW"
+				}
+				],
+				"rows": _.map(hits, hit => {
+					return [hit.timeInSeconds, hit.payload.fields.response[0], hit.payload.fields.host[0], hit.payload.fields.bytesSent, hit.payload.stored]
+				}),
+				"type": "table"
+			}
+			];
 		}
 		this.response.data = dataArr;
 		return this.response;
