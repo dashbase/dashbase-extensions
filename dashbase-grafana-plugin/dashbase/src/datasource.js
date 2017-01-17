@@ -36,7 +36,7 @@ export class DashbaseDatasource {
 			return $q.when([]);
 		}
 		return this._post("sql", payload).then(function(response) {
-			return new RapidResponseParser(response).parseGraphResponse(sentTargets);
+			return new RapidResponseParser(response).parseResponse(sentTargets);
 		});
 	}
 
@@ -58,14 +58,31 @@ export class DashbaseDatasource {
 	}
 
 	_buildQueryString(target, timerange) {
-		var queryStr = `SELECT ${target.target} AS "${target.alias}"`;
+		var queryStr = `SELECT ${target.target}`;
+		if (target.target && this._isAggregation(target.target)) {
+			queryStr += ` AS "${target.alias}"`;
+		} else {
+			target.alias = ""; // remove alias as it is not used
+		}
 		var timeRangeFilter = ` BEFORE ${timerange.to.unix()} AFTER ${timerange.from.unix()}`; // time in seconds
-	
+
 		if (target.query) { // if WHERE query exists
 			queryStr += ` WHERE ${target.query}`;
 		}
-		queryStr += timeRangeFilter ;
+		queryStr += timeRangeFilter;
+
+		if(target.limit) {
+			queryStr += ` LIMIT ${target.limit}`;
+		}
 		return queryStr;
+	}
+
+	_isAggregation(str) {
+		var aggregations = ["sum(", "min(", "max(", "avg(", "facet(", "histo(", "ts(", "cohort("];
+		for (var i = 0; i < aggregations.length; i++) {
+			if (_.includes(str, aggregations[i])) return true;
+		}
+		return false;
 	}
 
 	_request(method, endpoint, data) {

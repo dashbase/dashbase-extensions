@@ -6,10 +6,11 @@ export class DashbaseDatasourceQueryCtrl extends QueryCtrl {
 
 		this.scope = $scope;
 		this.uiSegmentSrv = uiSegmentSrv;
-		this.target.target = this.target.target;
+		this.target.target = this.target.target || "*";
 		this.target.alias = this.target.alias || "";
 		this.target.query = this.target.query || "";
-		this.target.type = "sql"; // uses the sql endpoint
+		this.target.type = this.target.type || "timeseries"; // default to graph
+		this.target.limit = this.target.limit; // default is 10 from backend
 	}
 
 	getOptions() {
