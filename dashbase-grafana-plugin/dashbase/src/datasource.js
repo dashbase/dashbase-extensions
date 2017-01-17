@@ -15,7 +15,6 @@ export class DashbaseDatasource {
 	}
 
 	query(options) {
-		console.log(options);
 		// options contains the request object, targets being the list of queries on the graph
 		var payload = "";
 		var target;
@@ -37,7 +36,6 @@ export class DashbaseDatasource {
 			return $q.when([]);
 		}
 		return this._post("sql", payload).then(function(response) {
-			console.log(response.data);
 			return new RapidResponseParser(response).parseResponse(sentTargets);
 		});
 	}
@@ -76,7 +74,6 @@ export class DashbaseDatasource {
 		if(target.limit) {
 			queryStr += ` LIMIT ${target.limit}`;
 		}
-		console.log(queryStr);
 		return queryStr;
 	}
 
