@@ -14,9 +14,7 @@ export class RapidResponseParser {
 			console.log(this.response.data.error); // log out parse error
 			return this.response;
 		}
-		console.log(sentTargets);
 		if (sentTargets[0].type == "timeseries") { // graph format
-			console.log("YOLO");
 			target = this.response.data.aggregations[sentTargets[0].alias]; // change to i for when implementing support for multi queries per graph
 			if (!target) return this.response; // no response from bad query
 			if (target.histogramBuckets) {
@@ -30,7 +28,6 @@ export class RapidResponseParser {
 			}
 		} else { // table format
 			var hits = this.response.data.hits;
-			console.log(hits);
 			dataArr = [{
 				"columns": [
 				{
@@ -54,13 +51,12 @@ export class RapidResponseParser {
 				}
 				],
 				"rows": _.map(hits, hit => {
-					return [hit.timeInSec, hit.payload.fields.response[0], hit.payload.fields.host[0], hit.payload.fields.bytesSent, hit.payload.stored]
+					return [hit.timeInSeconds, hit.payload.fields.response[0], hit.payload.fields.host[0], hit.payload.fields.bytesSent, hit.payload.stored]
 				}),
 				"type": "table"
 			}
 			];
 		}
-		console.log(dataArr);
 		this.response.data = dataArr;
 		return this.response;
 	}
