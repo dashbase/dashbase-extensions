@@ -11,7 +11,7 @@ Download to desired path and set custom plugin path in Grafana configuration.
 Uncomment and set `plugin = /path/to/dashbase-extensions/dashbase-grafana-plugin/` within `src/github.com/grafana/grafana/conf/custom.ini`. Copy from `sample.ini` if this file does not exist.
 </br>
 #### Brew
-Uncomment and set `plugin = /path/to/dashbase-extensions/dashbase-grafana-plugin/` within `/usr/local/etc/grafana`. 
+Uncomment and set `plugin = /path/to/dashbase-extensions/dashbase-grafana-plugin/` within `/usr/local/etc/grafana/grafana.ini`. 
 #### Other Installations
 Refer to http://docs.grafana.org/installation/ for more details regarding where to find custom configurations directory.
 </br>
