@@ -28,30 +28,32 @@ export class RapidResponseParser {
 			}
 		} else { // table format
 			var hits = this.response.data.hits;
-			dataArr = [{
-				"columns": [
+			var fields = Object.keys(hits[0].payload.fields); // take the first hit and extract fields
+			var columns = [
 				{
 					"text": "DATE",
 					"type": "date",
-					"sort": true,
-					"desc": true,
-				},
-				{
-					"text": "RESPONSE"
-				},
-				{
-					"text": "HOST"
-				},
-				{
-					"text": "BYTESSENT",
-					"sort": true
-				},
-				{
-					"text": "RAW"
+					"sort": false
 				}
-				],
+			];
+			columns = columns.concat(_.map(fields, field => {
+				return {"text": field.toUpperCase()}
+			}));
+			columns.push({
+				"text": "RAW",
+				"type": "string",
+				"sort": false
+			});
+
+			dataArr = [{ 
+				"columns": columns,
 				"rows": _.map(hits, hit => {
-					return [hit.timeInSeconds, hit.payload.fields.response[0], hit.payload.fields.host[0], hit.payload.fields.bytesSent, hit.payload.stored]
+					var row = [hit.timeInSeconds * 1000];
+					for (var i = 0; i < fields.length; i++) {
+						row.push(hit.payload.fields[fields[i]]);
+					}
+					row.push(hit.payload.stored);
+					return row;
 				}),
 				"type": "table"
 			}
