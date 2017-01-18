@@ -18,6 +18,7 @@ Refer to http://docs.grafana.org/installation/ for more details regarding where 
 ## Build
 ```
 cd /path/to/dashbase-extensions/dashbase-grafana-plugin/dashbase
+* Note: May need to install grunt globally; if so, npm install -g grunt
 npm install
 grunt
 ```
