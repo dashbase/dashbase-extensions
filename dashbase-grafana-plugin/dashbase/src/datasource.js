@@ -58,8 +58,9 @@ export class DashbaseDatasource {
 	}
 
 	_buildQueryString(target, timerange) {
-		var queryStr = `SELECT ${target.target}`;
-		if (target.target && this._isAggregation(target.target)) {
+		var templateTarget = this.templateSrv.replace(target.target);
+		var queryStr = `SELECT ${templateTarget}`;
+		if (target.target && this._isAggregation(templateTarget)) {
 			queryStr += ` AS "${target.alias}"`;
 		} else {
 			target.alias = ""; // remove alias as it is not used
@@ -67,12 +68,12 @@ export class DashbaseDatasource {
 		var timeRangeFilter = ` BEFORE ${timerange.to.unix()} AFTER ${timerange.from.unix()}`; // time in seconds
 
 		if (target.query) { // if WHERE query exists
-			queryStr += ` WHERE ${target.query}`;
+			queryStr += ` WHERE ${this.templateSrv.replace(target.query)}`;
 		}
 		queryStr += timeRangeFilter;
 
 		if(target.limit) {
-			queryStr += ` LIMIT ${target.limit}`;
+			queryStr += ` LIMIT ${this.templateSrv.replace(target.limit)}`;
 		}
 		return queryStr;
 	}
