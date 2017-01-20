@@ -38,7 +38,7 @@ export class RapidResponseParser {
 		} else { // table format
 
 			// check if no hits or aggregations exist in response
-			if ((this.response.data.numHits == 0 && this.response.data.hits.length == 0)
+			if ((this.response.data.numHits == 0 && this.response.data.hits.length == 0) 
 				&& _.isEmpty(this.response.data.aggregations)) {
 				this.response.data = [];
 				return this.response;
@@ -96,7 +96,6 @@ export class RapidResponseParser {
 				"type": "table"
 			}];
 		}
-		console.log(dataArr);
 		this.response.data = dataArr;
 		return this.response;
 	}
