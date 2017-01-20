@@ -37,13 +37,35 @@ export class RapidResponseParser {
 
 		} else { // table format
 
-			// HITS RESPONSE
-			var hits = this.response.data.hits;
+			// check if no hits or aggregations exist in response
 			if ((this.response.data.numHits == 0 && this.response.data.hits.length == 0)
-			 && _.isEmpty(this.response.data.aggregations)) { // no hits or aggregations
+				&& _.isEmpty(this.response.data.aggregations)) {
 				this.response.data = [];
 				return this.response;
 			}
+
+			if (_.includes(sentTargets[0].target, "facet(")) { // check if first sent query is a facet
+				target = this.response.data.aggregations[sentTargets[0].alias];
+				dataArr = [{
+					"columns": [{
+						"text": target.col.toUpperCase(),
+						"sort": false
+					},
+					{
+						"text": "COUNT",
+						"sort": false
+					}],
+					"rows": _.map(target.facets, facet => {
+						return [facet.value, facet.count];
+					}),
+					"type": "table"
+				}];
+				this.response.data = dataArr;
+				return this.response;
+			}
+
+			// HITS RESPONSE
+			var hits = this.response.data.hits;
 			var fields = Object.keys(hits[0].payload.fields); // take the first hit and extract fields
 			var columns = [
 			{
@@ -74,6 +96,7 @@ export class RapidResponseParser {
 				"type": "table"
 			}];
 		}
+		console.log(dataArr);
 		this.response.data = dataArr;
 		return this.response;
 	}
