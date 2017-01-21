@@ -9,10 +9,8 @@ export class RapidResponseParser {
 		var target;
 		var dataArr = [];
 		if (this.response.data.error) {
-
-			// TODO: send error to Grafana front end instead of logging to console
-			console.log(this.response.data.error); // log out parse error
-			return this.response;
+			this.response.data = this.response.data.error; // report server error
+			throw this.response;
 		}
 
 		if (sentTargets[0].type == "timeseries") { // graph format
