@@ -41,10 +41,9 @@ public class CloudWatchFirehose implements RapidFirehose, Configurable {
     } else {
       String fwdToken;
       if ((fwdToken = result.getNextForwardToken()) != null) {
+        // get the next batch of 10,000 events
         result = result.withNextForwardToken(fwdToken);
         eventsIterator = result.getEvents().iterator();
-
-        logger.info("started another batch of 10k events");
         if (eventsIterator.hasNext()) {
           final String jsonMessage = mapper.writeValueAsString(eventsIterator.next());
           return jsonMessage.getBytes();
