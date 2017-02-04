@@ -1,0 +1,8 @@
+{
+	"clazz": "io.dashbase.firehose.cloudwatch.CloudWatchFirehose",
+	"params": {
+		"region": "us-west-1",
+		"log_group_name": "dashbase-demo-logs",
+		"log_stream_name": "dashbase_server.info"
+	}
+}
