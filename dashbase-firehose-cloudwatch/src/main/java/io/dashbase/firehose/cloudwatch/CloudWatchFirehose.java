@@ -25,7 +25,6 @@ public class CloudWatchFirehose implements RapidFirehose, Configurable {
 
   private GetLogEventsResult result;
   private Iterator<OutputLogEvent> eventsIterator;
-  private ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 
   @Override
   public void seekToOffset(String offset) {
