@@ -1,30 +1,38 @@
 package io.dashbase.firehose.cloudwatch;
 
-import java.io.ByteArrayOutputStream;
 import java.util.Iterator;
 import java.util.Map;
 
 import com.amazonaws.services.logs.model.GetLogEventsRequest;
 import com.amazonaws.services.logs.model.GetLogEventsResult;
 import com.amazonaws.services.logs.model.OutputLogEvent;
+import com.codahale.metrics.MetricRegistry;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Preconditions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import rapid.components.AbstractServiceComponent;
 import rapid.firehose.RapidFirehose;
 import rapid.server.config.Configurable;
 
 import com.amazonaws.services.logs.*;
+import rapid.server.config.Measurable;
 
 
-public class CloudWatchFirehose implements RapidFirehose, Configurable {
+public class CloudWatchFirehose implements RapidFirehose, Configurable, Measurable, AbstractServiceComponent {
   private static Logger logger = LoggerFactory.getLogger(CloudWatchFirehose.class);
   private static ObjectMapper mapper = new ObjectMapper();
 
+  private String logGroupName;
+  private String logStreamName;
+  private AWSLogs cloudWatchClient;
+
   private GetLogEventsResult result;
   private Iterator<OutputLogEvent> eventsIterator;
+
+
 
   @Override
   public void seekToOffset(String offset) {
@@ -55,13 +63,33 @@ public class CloudWatchFirehose implements RapidFirehose, Configurable {
 
   @Override
   public void configure(Map<String, Object> params) {
-    logger.info("start dashbase cloudwatch firehose server ");
+    logger.info("setting cloudwatch firehose configurations");
+    logGroupName = Preconditions.checkNotNull((String) params.get("log_group_name"));
+    logStreamName = Preconditions.checkNotNull((String) params.get("log_stream_name"));
+  }
 
-    String logGroupName = Preconditions.checkNotNull((String) params.get("log_group_name"));
-    String logStreamName = Preconditions.checkNotNull((String) params.get("log_stream_name"));
+  @Override
+  public void registerMetrics(MetricRegistry metricRegistry) {
 
-    AWSLogs cloudWatchClient = AWSLogsClientBuilder.defaultClient();
+  }
 
+  @Override
+  public void start() throws Exception {
+    logger.info("starting cloudwatch client");
+    runClient();
+    logger.info("cloudwatch client started");
+
+  }
+
+  @Override
+  public void shutdown() throws Exception {
+    logger.info("stopping cloudwatch client");
+    cloudWatchClient.shutdown();
+    logger.info("cloudwatch client stopped");
+  }
+
+  private void runClient() {
+    cloudWatchClient = AWSLogsClientBuilder.defaultClient();
     result = cloudWatchClient.getLogEvents(new GetLogEventsRequest()
       .withLogGroupName(logGroupName)
       .withLogStreamName(logStreamName));
