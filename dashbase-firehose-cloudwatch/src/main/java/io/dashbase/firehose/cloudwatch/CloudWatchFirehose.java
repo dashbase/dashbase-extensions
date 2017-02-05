@@ -3,6 +3,7 @@ package io.dashbase.firehose.cloudwatch;
 import java.util.Iterator;
 import java.util.Map;
 
+import com.amazonaws.regions.Region;
 import com.amazonaws.services.logs.model.GetLogEventsRequest;
 import com.amazonaws.services.logs.model.GetLogEventsResult;
 import com.amazonaws.services.logs.model.OutputLogEvent;
@@ -27,6 +28,7 @@ public class CloudWatchFirehose implements RapidFirehose, Configurable, Measurab
   private static Logger logger = LoggerFactory.getLogger(CloudWatchFirehose.class);
   private static ObjectMapper mapper = new ObjectMapper();
 
+  private Region region;
   private String logGroupName;
   private String logStreamName;
   private AWSLogs cloudWatchClient;
@@ -71,8 +73,8 @@ public class CloudWatchFirehose implements RapidFirehose, Configurable, Measurab
   @Override
   public void configure(Map<String, Object> params) {
     logger.info("setting cloudwatch firehose configurations");
-    logGroupName = Preconditions.checkNotNull((String) params.get("log_group_name"));
-    logStreamName = Preconditions.checkNotNull((String) params.get("log_stream_name"));
+    logGroupName = Preconditions.checkNotNull((String) params.get("group"));
+    logStreamName = Preconditions.checkNotNull((String) params.get("stream"));
   }
 
   @Override
@@ -86,6 +88,7 @@ public class CloudWatchFirehose implements RapidFirehose, Configurable, Measurab
   public void start() throws Exception {
     logger.info("starting cloudwatch client");
     cloudWatchClient = AWSLogsClientBuilder.defaultClient();
+    cloudWatchClient.setRegion(region);
     result = cloudWatchClient.getLogEvents(new GetLogEventsRequest()
       .withLogGroupName(logGroupName)
       .withLogStreamName(logStreamName));
