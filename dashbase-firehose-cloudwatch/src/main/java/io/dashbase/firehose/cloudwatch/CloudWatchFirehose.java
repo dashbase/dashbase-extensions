@@ -70,13 +70,18 @@ public class CloudWatchFirehose implements RapidFirehose, Configurable, Measurab
 
   @Override
   public void registerMetrics(MetricRegistry metricRegistry) {
-
+    
   }
 
   @Override
   public void start() throws Exception {
     logger.info("starting cloudwatch client");
-    runClient();
+    cloudWatchClient = AWSLogsClientBuilder.defaultClient();
+    result = cloudWatchClient.getLogEvents(new GetLogEventsRequest()
+      .withLogGroupName(logGroupName)
+      .withLogStreamName(logStreamName));
+
+    eventsIterator = result.getEvents().iterator();
     logger.info("cloudwatch client started");
 
   }
@@ -88,12 +93,4 @@ public class CloudWatchFirehose implements RapidFirehose, Configurable, Measurab
     logger.info("cloudwatch client stopped");
   }
 
-  private void runClient() {
-    cloudWatchClient = AWSLogsClientBuilder.defaultClient();
-    result = cloudWatchClient.getLogEvents(new GetLogEventsRequest()
-      .withLogGroupName(logGroupName)
-      .withLogStreamName(logStreamName));
-
-    eventsIterator = result.getEvents().iterator();
-  }
 }
