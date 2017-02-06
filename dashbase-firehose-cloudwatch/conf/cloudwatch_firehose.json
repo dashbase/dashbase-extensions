@@ -1,7 +1,7 @@
 {
 	"clazz": "io.dashbase.firehose.cloudwatch.CloudWatchFirehose",
 	"params": {
-		"group": "dashbase-demo-logs",
-		"stream": "dashbase_server.info"
+		"group": "dashbase-demo",
+		"stream": "dashbase-demo-logs"
 	}
 }
