@@ -28,7 +28,6 @@ public class CloudWatchFirehose implements RapidFirehose, Configurable, Measurab
   private static Logger logger = LoggerFactory.getLogger(CloudWatchFirehose.class);
   private static ObjectMapper mapper = new ObjectMapper();
 
-  private Region region;
   private String logGroupName;
   private String logStreamName;
   private AWSLogs cloudWatchClient;
@@ -88,7 +87,6 @@ public class CloudWatchFirehose implements RapidFirehose, Configurable, Measurab
   public void start() throws Exception {
     logger.info("starting cloudwatch client");
     cloudWatchClient = AWSLogsClientBuilder.defaultClient();
-    cloudWatchClient.setRegion(region);
     result = cloudWatchClient.getLogEvents(new GetLogEventsRequest()
       .withLogGroupName(logGroupName)
       .withLogStreamName(logStreamName));
