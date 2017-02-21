@@ -5,9 +5,6 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.LinkedBlockingQueue;
 
-import com.codahale.metrics.Gauge;
-import com.codahale.metrics.Meter;
-import com.codahale.metrics.MetricRegistry;
 import org.graylog2.syslog4j.server.SyslogServer;
 import org.graylog2.syslog4j.server.SyslogServerConfigIF;
 import org.graylog2.syslog4j.server.SyslogServerEventHandlerIF;
@@ -16,12 +13,14 @@ import org.graylog2.syslog4j.server.SyslogServerIF;
 import org.graylog2.syslog4j.server.SyslogServerSessionEventHandlerIF;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import rapid.components.AbstractServiceComponent;
-import rapid.firehose.RapidFirehose;
-import rapid.server.config.Configurable;
-import rapid.server.config.Measurable;
 
-public class SyslogFirehose implements RapidFirehose, Configurable, Measurable, AbstractServiceComponent {
+import com.codahale.metrics.Gauge;
+import com.codahale.metrics.Meter;
+import com.codahale.metrics.MetricRegistry;
+
+import rapid.firehose.RapidFirehose;
+
+public class SyslogFirehose extends RapidFirehose {
 
   private static Logger logger = LoggerFactory.getLogger(SyslogFirehose.class);
   private String protocol = "udp";
@@ -38,7 +37,6 @@ public class SyslogFirehose implements RapidFirehose, Configurable, Measurable, 
   private Meter blockMeter = null;
   private Meter bytesMeter = null;
   private Meter requestMeter = null;
-  private Meter eventConsumeMeter = null;
   private Meter eventProduceMeter = null;
   
   private SyslogServerIF threadedInstance = null;
@@ -48,17 +46,18 @@ public class SyslogFirehose implements RapidFirehose, Configurable, Measurable, 
 
 	@Override
 	public void registerMetrics(MetricRegistry metricRegistry) {
+	  super.registerMetrics(metricRegistry);
 	  metricRegistry.register("firehose.syslog.queue.size", (Gauge<Integer>) () -> queue.size());
     blockMeter = metricRegistry.meter("firehose.syslog.block");
     bytesMeter = metricRegistry.meter("firehose.syslog.bytes.read");
     requestMeter = metricRegistry.meter("firehose.syslog.requests");
-    eventConsumeMeter = metricRegistry.meter("firehose.syslog.consume");
     eventProduceMeter = metricRegistry.meter("firehose.syslog.produce");		
 	}
 
 	@Override
 	public void configure(Map<String, Object> params) {
 	  logger.info("start dashbase syslog firehose server ");
+	  super.configure(params);
 	  if (params != null) {
 	    if (params.containsKey("port")) {
         try {
@@ -77,11 +76,9 @@ public class SyslogFirehose implements RapidFirehose, Configurable, Measurable, 
 	}
 
     @Override
-    public byte[] next() {
+    public byte[] doNext() {
         try {
-            byte[] nextData = queue.take();
-            eventConsumeMeter.mark();
-            return nextData;
+            return queue.take();
         } catch (InterruptedException e) {
             logger.warn("waiting on queue interrupted.", e);
             return null;

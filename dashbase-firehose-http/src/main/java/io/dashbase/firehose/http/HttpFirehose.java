@@ -22,7 +22,7 @@ import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricRegistry;
 
 
-public class HttpFirehose implements RapidFirehose, Configurable, Measurable, AbstractServiceComponent
+public class HttpFirehose extends RapidFirehose
 {
   private static Logger logger = LoggerFactory.getLogger(HttpFirehose.class);
   private static final int DEFAULT_PORT = 9999;
@@ -39,7 +39,6 @@ public class HttpFirehose implements RapidFirehose, Configurable, Measurable, Ab
   private Meter blockMeter = null;
   private Meter bytesMeter = null;
   private Meter requestMeter = null;
-  private Meter eventConsumeMeter = null;
   private Meter eventProduceMeter = null;
   
   private AtomicBoolean drained = new AtomicBoolean(false);
@@ -51,12 +50,10 @@ public class HttpFirehose implements RapidFirehose, Configurable, Measurable, Ab
   }
 
   @Override
-  public byte[] next()
+  public byte[] doNext()
   {
     try {
-      byte[] data = queue.take();
-      eventConsumeMeter.mark();
-      return data;
+      return queue.take();
     } catch (InterruptedException e) {
       logger.warn("waiting on queue interrupted.", e);
       return null;
@@ -155,11 +152,11 @@ public class HttpFirehose implements RapidFirehose, Configurable, Measurable, Ab
   @Override
   public void registerMetrics(MetricRegistry metricRegistry)
   {
+    super.registerMetrics(metricRegistry);
     metricRegistry.register("firehose.http.queue.size", (Gauge<Integer>) () -> queue.size());
     blockMeter = metricRegistry.meter("firehose.http.block");
     bytesMeter = metricRegistry.meter("firehose.http.bytes.read");
     requestMeter = metricRegistry.meter("firehose.http.requests");
-    eventConsumeMeter = metricRegistry.meter("firehose.http.consume");
     eventProduceMeter = metricRegistry.meter("firehose.http.produce");
   }
 }
