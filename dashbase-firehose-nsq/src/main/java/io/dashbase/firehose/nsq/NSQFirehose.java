@@ -20,7 +20,7 @@ import rapid.firehose.RapidFirehose;
 import rapid.server.config.Configurable;
 import rapid.server.config.Measurable;
 
-public class NSQFirehose implements RapidFirehose, Configurable, Measurable, AbstractServiceComponent {
+public class NSQFirehose extends RapidFirehose {
     private static final Logger logger = LoggerFactory.getLogger(NSQFirehose.class);
 
     private final NSQLookup nsqLookup;
@@ -30,7 +30,6 @@ public class NSQFirehose implements RapidFirehose, Configurable, Measurable, Abs
 
     private BlockingQueue<NSQMessage> blockingQueue = new LinkedBlockingQueue<>();
     
-    private Meter eventConsumpMeter = null;
     private Meter eventProduceMeter = null;
     
 
@@ -93,6 +92,7 @@ public class NSQFirehose implements RapidFirehose, Configurable, Measurable, Abs
     @Override
     public void configure(Map<String, Object> params) {
         logger.info("NSQ firehose configuration: " + params);
+        super.configure(params);
         ObjectMapper mapper = new ObjectMapper();
         nsqConfig = mapper.convertValue(params, NSQFirehoseConfig.class);
         Preconditions.checkNotNull(nsqConfig);
@@ -100,11 +100,10 @@ public class NSQFirehose implements RapidFirehose, Configurable, Measurable, Abs
     }
 
     @Override
-    public byte[] next() {
+    public byte[] doNext() {
         try {
             final NSQMessage message = blockingQueue.take();
             message.finished();
-            eventConsumpMeter.mark();
             return message.getMessage();
         } catch (InterruptedException e) {
             logger.error("Interrupted while taking message", e);
@@ -120,8 +119,8 @@ public class NSQFirehose implements RapidFirehose, Configurable, Measurable, Abs
 
 	@Override
 	public void registerMetrics(MetricRegistry metricRegistry) {
-		metricRegistry.register("firehose.nsq.queue.size", (Gauge<Integer>) () -> blockingQueue.size());
-		eventConsumpMeter = metricRegistry.meter("firehose.nsq.consume");
+		super.registerMetrics(metricRegistry);
+		metricRegistry.register("firehose.nsq.queue.size", (Gauge<Integer>) () -> blockingQueue.size());		
 	    eventProduceMeter = metricRegistry.meter("firehose.jsq.produce");
 	}
 }
