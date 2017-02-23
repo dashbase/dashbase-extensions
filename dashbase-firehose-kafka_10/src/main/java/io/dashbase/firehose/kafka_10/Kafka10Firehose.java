@@ -103,8 +103,8 @@ public class Kafka10Firehose extends RapidFirehose {
 	
   public void start() throws Exception
   {
-    //this.consumer.subscribe(ImmutableSet.of(config.topic));    
-    this.consumer.assign(ImmutableSet.of(new TopicPartition(config.topic, 0)));
+    this.consumer.subscribe(ImmutableSet.of(config.topic));    
+    //this.consumer.assign(ImmutableSet.of(new TopicPartition(config.topic, 0)));
   }
 
   public void shutdown() throws Exception

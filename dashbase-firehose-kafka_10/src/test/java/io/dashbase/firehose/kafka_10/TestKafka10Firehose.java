@@ -7,6 +7,7 @@ import org.apache.kafka.clients.consumer.MockConsumer;
 import org.apache.kafka.clients.consumer.OffsetResetStrategy;
 import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.record.TimestampType;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.google.common.base.Charsets;
@@ -17,6 +18,7 @@ import junit.framework.Assert;
 public class TestKafka10Firehose
 {
   @Test
+  @Ignore
   public void testBasic() throws Exception {
     MockConsumer<byte[], byte[]> mockConsumer = new MockConsumer<>(OffsetResetStrategy.EARLIEST);    
     int numRecords = 10;
