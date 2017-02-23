@@ -3,7 +3,6 @@ package io.dashbase.firehose.cloudwatch;
 import java.util.Iterator;
 import java.util.Map;
 
-import com.amazonaws.regions.Region;
 import com.amazonaws.services.logs.model.GetLogEventsRequest;
 import com.amazonaws.services.logs.model.GetLogEventsResult;
 import com.amazonaws.services.logs.model.OutputLogEvent;
@@ -16,15 +15,11 @@ import com.google.common.base.Preconditions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import rapid.components.AbstractServiceComponent;
 import rapid.firehose.RapidFirehose;
-import rapid.server.config.Configurable;
 
 import com.amazonaws.services.logs.*;
-import rapid.server.config.Measurable;
 
-
-public class CloudWatchFirehose implements RapidFirehose, Configurable, Measurable, AbstractServiceComponent {
+public class CloudWatchFirehose extends RapidFirehose {
   private static Logger logger = LoggerFactory.getLogger(CloudWatchFirehose.class);
   private static ObjectMapper mapper = new ObjectMapper();
 
@@ -44,7 +39,7 @@ public class CloudWatchFirehose implements RapidFirehose, Configurable, Measurab
   }
 
   @Override
-  public byte[] next() throws JsonProcessingException {
+  public byte[] doNext() throws JsonProcessingException {
     // MAX response of 1 MB, or 10,000 events
     if (eventsIterator.hasNext()) {
       final byte[] jsonMessage = mapper.writeValueAsString(eventsIterator.next()).getBytes();
