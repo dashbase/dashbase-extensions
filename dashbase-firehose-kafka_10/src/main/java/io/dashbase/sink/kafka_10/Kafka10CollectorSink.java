@@ -25,7 +25,7 @@ public class Kafka10CollectorSink extends CollectorSink {
   private static final Logger logger = LoggerFactory.getLogger(Kafka10Firehose.class);
 
   KafkaSinkConfig config;
-  private KafkaProducer<byte[], byte[]> producer = null;
+  private Producer<byte[], byte[]> producer = null;
 
   @Override
   protected void doAdd(String name, Map<String, String> params, byte[] data, boolean isBatch)
@@ -68,7 +68,7 @@ public class Kafka10CollectorSink extends CollectorSink {
 
   @VisibleForTesting
   void setProducer(Producer<byte[], byte[]> producer) {
-    this.producer = (KafkaProducer<byte[], byte[]>) producer;
+    this.producer = producer;
   }
 
   private static KafkaProducer<byte[], byte[]> buildProducer(KafkaSinkConfig config) {
