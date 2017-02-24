@@ -40,15 +40,15 @@ public class TestKafka10CollectorSink {
       byte[] data = String.valueOf(i).getBytes(Charsets.UTF_8);
       ProducerRecord<byte[], byte[]> record = new ProducerRecord<byte[], byte[]>(topic, data);
       Future<RecordMetadata> metadata = mockProducer.send(record);
-      Assert.assertTrue("Send should be immediately complete", metadata.isDone());
-      Assert.assertEquals("Offset should be 0", 0, metadata.get().offset());
+      Assert.assertTrue("record should send immediately", metadata.isDone());
+      Assert.assertEquals("offset should be equivalent " + i, i, metadata.get().offset());
       Assert.assertEquals(topic, metadata.get().topic());
-      Assert.assertEquals("We should have the record in our history", Arrays.asList(record),
-          mockProducer.history());
+      Assert.assertEquals("record is in producer history", record,
+          mockProducer.history().get(i));
     }
 
     mockProducer.clear();
-    Assert.assertEquals("Clear should erase our history", 0, mockProducer.history().size());
+    Assert.assertEquals("clear erases history", 0, mockProducer.history().size());
 
     sink.shutdown();
   }
