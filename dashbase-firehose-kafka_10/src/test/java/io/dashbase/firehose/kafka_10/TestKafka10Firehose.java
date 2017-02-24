@@ -1,13 +1,14 @@
 package io.dashbase.firehose.kafka_10;
 
+import com.google.common.collect.ImmutableSet;
 import java.util.Map;
+import java.util.Arrays;
 
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.MockConsumer;
 import org.apache.kafka.clients.consumer.OffsetResetStrategy;
 import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.record.TimestampType;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import com.google.common.base.Charsets;
@@ -18,7 +19,6 @@ import junit.framework.Assert;
 public class TestKafka10Firehose
 {
   @Test
-  @Ignore
   public void testBasic() throws Exception {
     MockConsumer<byte[], byte[]> mockConsumer = new MockConsumer<>(OffsetResetStrategy.EARLIEST);    
     int numRecords = 10;
@@ -35,13 +35,18 @@ public class TestKafka10Firehose
         this.config.topic = topic;
         setConsumer(mockConsumer);
       }
+
+      @Override
+      public void start() {
+        mockConsumer.assign(ImmutableSet.of(new TopicPartition(config.topic, partition)));
+      }
       
     };
     
     firehose.configure(null);
     
-    firehose.start();    
-    
+    firehose.start();
+
     for (int i = 0; i < numRecords; ++i) {
       byte[] data = String.valueOf(i).getBytes(Charsets.UTF_8);
       mockConsumer.addRecord(new ConsumerRecord<byte[], byte[]>(
