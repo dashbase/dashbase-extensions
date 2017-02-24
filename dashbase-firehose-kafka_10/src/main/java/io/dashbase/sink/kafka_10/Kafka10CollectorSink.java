@@ -44,6 +44,11 @@ public class Kafka10CollectorSink extends CollectorSink {
   }
 
   @Override
+  public void start() throws Exception {
+    //logger.info("kafka sink started");
+  }
+
+  @Override
   public void shutdown() throws Exception {
     if (producer != null) {
       producer.close();

@@ -2,7 +2,6 @@ package io.dashbase.firehose.kafka_10;
 
 import com.google.common.collect.ImmutableSet;
 import java.util.Map;
-import java.util.Arrays;
 
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.MockConsumer;
