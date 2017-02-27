@@ -30,82 +30,80 @@ import com.google.common.collect.Maps;
 import rapid.firehose.RapidFirehose;
 
 public class Kafka10Firehose extends RapidFirehose {
+
   private static final Logger logger = LoggerFactory.getLogger(Kafka10Firehose.class);
-  
+
   KafkaFirehoseConfig config;
   private volatile boolean stop = false;
-  
+
   private Consumer<byte[], byte[]> consumer;
   private Iterator<ConsumerRecord<byte[], byte[]>> batchIterator = null;
-  
+
   static final int DEFAULT_POLL_INTERVAL_MS = 100;
-  
+
   private KafkaOffset offset = new KafkaOffset();
   private int currentPartition = -1;
   private AtomicLong currentOffset = new AtomicLong(0L);
-  
+
   private final ObjectMapper mapper = new ObjectMapper();
-  
-	public byte[] doNext() throws IOException {
-	  if (batchIterator == null) {
-	    ConsumerRecords<byte[], byte[]> batch = null;
-  	  while (!stop) {
-  	    batch = consumer.poll(config.pollIntervalMs);
-  	    if (batch == null || batch.isEmpty()) {
-  	      try {
+
+  public byte[] doNext() throws IOException {
+    if (batchIterator == null) {
+      ConsumerRecords<byte[], byte[]> batch = null;
+      while (!stop) {
+        batch = consumer.poll(config.pollIntervalMs);
+        if (batch == null || batch.isEmpty()) {
+          try {
             Thread.sleep(1000);
           } catch (InterruptedException e) {
             continue;
           }
-  	    } else {
-  	      break;
-  	    }
-  	  }  	  
-  	  batchIterator = batch.iterator();
-	  }
-	  if (batchIterator.hasNext()) {	    
-	    ConsumerRecord<byte[], byte[]> record = batchIterator.next();	    
-	    int recordPartition = record.partition();
-	    long recordOffset = record.offset();
-	    if (currentPartition == recordPartition) {
-	      currentOffset.set(Math.max(currentOffset.get(), recordOffset));
-	    } else {
-	      currentPartition = recordPartition;
-	      currentOffset = offset.offsetMap.get(recordPartition);
-	      if (currentOffset == null) {
-	        currentOffset = new AtomicLong(recordOffset);
-	        offset.offsetMap.put(recordPartition, currentOffset);
-	      } else {
-	        currentOffset.set(Math.max(currentOffset.get(), recordOffset));
-	      }	      
-	    }
-	    return record.value();
-	  } else {
-	    batchIterator = null;
-	    return doNext();
-	  }
-	}
-	
-	private static KafkaConsumer<byte[], byte[]> buildConsumer(KafkaFirehoseConfig config) {
-	  Properties props = new Properties();
+        } else {
+          break;
+        }
+      }
+      batchIterator = batch.iterator();
+    }
+    if (batchIterator.hasNext()) {
+      ConsumerRecord<byte[], byte[]> record = batchIterator.next();
+      int recordPartition = record.partition();
+      long recordOffset = record.offset();
+      if (currentPartition == recordPartition) {
+        currentOffset.set(Math.max(currentOffset.get(), recordOffset));
+      } else {
+        currentPartition = recordPartition;
+        currentOffset = offset.offsetMap.get(recordPartition);
+        if (currentOffset == null) {
+          currentOffset = new AtomicLong(recordOffset);
+          offset.offsetMap.put(recordPartition, currentOffset);
+        } else {
+          currentOffset.set(Math.max(currentOffset.get(), recordOffset));
+        }
+      }
+      return record.value();
+    } else {
+      batchIterator = null;
+      return doNext();
+    }
+  }
+
+  private static KafkaConsumer<byte[], byte[]> buildConsumer(KafkaFirehoseConfig config) {
+    Properties props = new Properties();
     props.putAll(config.kafkaProps);
     props.put("bootstrap.servers", config.hosts);
     props.put("group.id", config.groupId);
     props.put("key.deserializer", ByteArrayDeserializer.class.getName());
     props.put("value.deserializer", ByteArrayDeserializer.class.getName());
     props.put("enable.auto.commit", "false");
-    KafkaConsumer<byte[], byte[]> consumer = new KafkaConsumer<>(props);    
+    KafkaConsumer<byte[], byte[]> consumer = new KafkaConsumer<>(props);
     return consumer;
-	}
-	
-  public void start() throws Exception
-  {
-    this.consumer.subscribe(ImmutableSet.of(config.topic));    
-    //this.consumer.assign(ImmutableSet.of(new TopicPartition(config.topic, 0)));
   }
 
-  public void shutdown() throws Exception
-  {    
+  public void start() throws Exception {
+    this.consumer.subscribe(ImmutableSet.of(config.topic));
+  }
+
+  public void shutdown() throws Exception {
     try {
       stop = true;
       Thread.currentThread().interrupt();
@@ -113,14 +111,13 @@ public class Kafka10Firehose extends RapidFirehose {
       consumer.close();
     }
   }
-  
+
   @VisibleForTesting
   void setConsumer(Consumer<byte[], byte[]> consumer) {
     this.consumer = consumer;
   }
 
-  public void configure(Map<String, Object> params)
-  {    
+  public void configure(Map<String, Object> params) {
     logger.info("kafka firehose configuration: " + params);
     super.configure(params);
     ObjectMapper mapper = new ObjectMapper();
@@ -129,8 +126,7 @@ public class Kafka10Firehose extends RapidFirehose {
     setConsumer(buildConsumer(config));
   }
 
-  public void seekToOffset(String offsetString) throws IOException
-  {
+  public void seekToOffset(String offsetString) throws IOException {
     offset = mapper.readValue(offsetString, KafkaOffset.class);
     for (Entry<Integer, AtomicLong> entry : offset.offsetMap.entrySet()) {
       TopicPartition topicPartition = new TopicPartition(config.topic, entry.getKey());
@@ -138,27 +134,25 @@ public class Kafka10Firehose extends RapidFirehose {
     }
   }
 
-  public String getOffset() throws IOException
-  {
+  public String getOffset() throws IOException {
     consumer.commitAsync();
     return mapper.writeValueAsString(offset);
   }
 
   @Override
-  public void registerMetrics(MetricRegistry metricRegistry)
-  {
+  public void registerMetrics(MetricRegistry metricRegistry) {
     super.registerMetrics(metricRegistry);
     Map<MetricName, ? extends Metric> metrics = this.consumer.metrics();
     for (final Entry<MetricName, ? extends Metric> entry : metrics.entrySet()) {
       MetricName metricName = entry.getKey();
       StringBuilder key = new StringBuilder();
-      
+
       key.append("firehose.kafka.")
-         .append(metricName.group()).append(".")
-         .append(metricName.name());
-      
-      metricRegistry.register(key.toString(), (Gauge<Double>) () -> entry.getValue().value());      
+        .append(metricName.group()).append(".")
+        .append(metricName.name());
+
+      metricRegistry.register(key.toString(), (Gauge<Double>) () -> entry.getValue().value());
     }
   }
-  
+
 }
