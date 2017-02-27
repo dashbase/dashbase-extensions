@@ -44,9 +44,6 @@ public class Kafka10Firehose extends RapidFirehose {
   private int currentPartition = -1;
   private AtomicLong currentOffset = new AtomicLong(0L);
   
-  private Meter eventsConsumeMeter = null;
-  private Meter bytesConsumeMeter = null;
-  
   private final ObjectMapper mapper = new ObjectMapper();
   
 	public byte[] doNext() throws IOException {
@@ -144,8 +141,6 @@ public class Kafka10Firehose extends RapidFirehose {
   public String getOffset() throws IOException
   {
     consumer.commitAsync();
-    String s = mapper.writeValueAsString(offset);
-    logger.info(s);
     return mapper.writeValueAsString(offset);
   }
 
