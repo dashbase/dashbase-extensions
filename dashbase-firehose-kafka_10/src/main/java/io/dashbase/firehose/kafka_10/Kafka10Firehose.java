@@ -40,7 +40,7 @@ public class Kafka10Firehose extends RapidFirehose {
   
   static final int DEFAULT_POLL_INTERVAL_MS = 100;
   
-  private Map<Integer, AtomicLong> offsetMap = Maps.newHashMap();  
+  private KafkaOffset offset = new KafkaOffset();
   private int currentPartition = -1;
   private AtomicLong currentOffset = new AtomicLong(0L);
   
@@ -74,10 +74,10 @@ public class Kafka10Firehose extends RapidFirehose {
 	      currentOffset.set(Math.max(currentOffset.get(), recordOffset));
 	    } else {
 	      currentPartition = recordPartition;
-	      currentOffset = offsetMap.get(recordPartition);
+	      currentOffset = offset.offsetMap.get(recordPartition);
 	      if (currentOffset == null) {
 	        currentOffset = new AtomicLong(recordOffset);
-	        offsetMap.put(recordPartition, currentOffset);
+	        offset.offsetMap.put(recordPartition, currentOffset);
 	      } else {
 	        currentOffset.set(Math.max(currentOffset.get(), recordOffset));
 	      }	      
@@ -134,17 +134,19 @@ public class Kafka10Firehose extends RapidFirehose {
 
   public void seekToOffset(String offsetString) throws IOException
   {
-    offsetMap = mapper.readValue(offsetString, Map.class);
-    for (Entry<Integer, AtomicLong> entry : offsetMap.entrySet()) {
-      TopicPartition topicPartition = new TopicPartition(config.topic, entry.getKey());     
+    offset = mapper.readValue(offsetString, KafkaOffset.class);
+    for (Entry<Integer, AtomicLong> entry : offset.offsetMap.entrySet()) {
+      TopicPartition topicPartition = new TopicPartition(config.topic, entry.getKey());
       consumer.seek(topicPartition, entry.getValue().get());
     }
   }
 
   public String getOffset() throws IOException
   {
-    consumer.commitAsync();    
-    return mapper.writeValueAsString(offsetMap);
+    consumer.commitAsync();
+    String s = mapper.writeValueAsString(offset);
+    logger.info(s);
+    return mapper.writeValueAsString(offset);
   }
 
   @Override
