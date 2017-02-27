@@ -1,8 +1,11 @@
 package io.dashbase.firehose.kafka_10;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableSet;
 import java.util.Map;
 
+import java.util.Map.Entry;
+import java.util.concurrent.atomic.AtomicLong;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.MockConsumer;
 import org.apache.kafka.clients.consumer.OffsetResetStrategy;
@@ -15,52 +18,53 @@ import com.google.common.collect.ImmutableMap;
 
 import junit.framework.Assert;
 
-public class TestKafka10Firehose
-{
+public class TestKafka10Firehose {
+
+  private int numRecords = 10;
+  private String topic = "test";
+  private int partition = 0;
+
+  private MockConsumer<byte[], byte[]> mockConsumer = new MockConsumer<>(
+      OffsetResetStrategy.EARLIEST);
+  private Kafka10Firehose firehose = new Kafka10Firehose() {
+
+    @Override
+    public void configure(Map<String, Object> params) {
+      this.config = new KafkaFirehoseConfig();
+      this.config.pollIntervalMs = 100;
+      this.config.topic = topic;
+      setConsumer(mockConsumer);
+    }
+
+    @Override
+    public void start() {
+      mockConsumer.assign(ImmutableSet.of(new TopicPartition(config.topic, partition)));
+    }
+
+  };
+
   @Test
   public void testBasic() throws Exception {
-    MockConsumer<byte[], byte[]> mockConsumer = new MockConsumer<>(OffsetResetStrategy.EARLIEST);    
-    int numRecords = 10;
-    String topic = "test";
-    int partition = 0;
-    
-    Kafka10Firehose firehose = new Kafka10Firehose() {
 
-      @Override
-      public void configure(Map<String, Object> params)
-      {
-        this.config = new KafkaFirehoseConfig();
-        this.config.pollIntervalMs = 100;
-        this.config.topic = topic;
-        setConsumer(mockConsumer);
-      }
-
-      @Override
-      public void start() {
-        mockConsumer.assign(ImmutableSet.of(new TopicPartition(config.topic, partition)));
-      }
-      
-    };
-    
     firehose.configure(null);
-    
+
     firehose.start();
 
     for (int i = 0; i < numRecords; ++i) {
       byte[] data = String.valueOf(i).getBytes(Charsets.UTF_8);
       mockConsumer.addRecord(new ConsumerRecord<byte[], byte[]>(
-          topic, 
-          partition, 
-          i, 
-          -1L, 
-          TimestampType.NO_TIMESTAMP_TYPE, 
-          0L, 
-          0, 
-          data.length, 
-          null, 
+          topic,
+          partition,
+          i,
+          -1L,
+          TimestampType.NO_TIMESTAMP_TYPE,
+          0L,
+          0,
+          data.length,
+          null,
           data));
     }
-    
+
     mockConsumer.updateBeginningOffsets(ImmutableMap.of(new TopicPartition(topic, partition), 0L));
     byte[] readData = null;
     int c = 0;
@@ -68,8 +72,72 @@ public class TestKafka10Firehose
       int readVal = Integer.parseInt(new String(readData, Charsets.UTF_8));
       Assert.assertEquals(c, readVal);
       c++;
-      if (c == numRecords) break;
-    }    
-    firehose.shutdown();    
+      if (c == numRecords) {
+        break;
+      }
+    }
+    firehose.shutdown();
   }
+
+  @Test
+  public void testKafkaOffset() throws Exception {
+
+    firehose.configure(null);
+
+    firehose.start();
+
+    byte[] data = String.valueOf(0).getBytes(Charsets.UTF_8);
+    mockConsumer.addRecord(new ConsumerRecord<byte[], byte[]>(
+        topic,
+        partition,
+        0,
+        -1L,
+        TimestampType.NO_TIMESTAMP_TYPE,
+        0L,
+        0,
+        data.length,
+        null,
+        data));
+
+    mockConsumer.updateBeginningOffsets(ImmutableMap.of(new TopicPartition(topic, partition), 0L));
+
+    firehose.next();
+
+    Assert.assertEquals("{\"offsetMap\":{\"0\":0}}", firehose.getOffset());
+
+    data = String.valueOf(1).getBytes(Charsets.UTF_8);
+    mockConsumer.addRecord(new ConsumerRecord<byte[], byte[]>(
+        topic,
+        partition,
+        1,
+        -1L,
+        TimestampType.NO_TIMESTAMP_TYPE,
+        0L,
+        0,
+        data.length,
+        null,
+        data));
+
+    firehose.next();
+
+    Assert.assertEquals("{\"offsetMap\":{\"0\":1}}", firehose.getOffset());
+
+    firehose.shutdown();
+  }
+
+  @Test
+  public void testKafkaOffsetMapping() throws Exception {
+    KafkaOffset offset = new KafkaOffset();
+    offset.offsetMap = ImmutableMap.of(1, new AtomicLong(2));
+    ObjectMapper mapper = new ObjectMapper();
+    String str = mapper.writeValueAsString(offset);
+    offset = mapper.readValue(str, KafkaOffset.class);
+
+    for (Entry<Integer, AtomicLong> entry : offset.offsetMap.entrySet()) {
+      Assert.assertEquals(1, entry.getKey().intValue());
+      Assert.assertEquals(2L, entry.getValue().longValue());
+    }
+  }
+
+
 }
