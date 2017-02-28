@@ -2,6 +2,7 @@ package io.dashbase.firehose.kafka_10;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableSet;
+import it.unimi.dsi.fastutil.ints.Int2LongOpenHashMap;
 import java.util.Map;
 
 import java.util.Map.Entry;
@@ -128,12 +129,12 @@ public class TestKafka10Firehose {
   @Test
   public void testKafkaOffsetMapping() throws Exception {
     KafkaOffset offset = new KafkaOffset();
-    offset.offsetMap = ImmutableMap.of(1, new AtomicLong(2));
+    offset.offsetMap = new Int2LongOpenHashMap();
     ObjectMapper mapper = new ObjectMapper();
     String str = mapper.writeValueAsString(offset);
     offset = mapper.readValue(str, KafkaOffset.class);
 
-    for (Entry<Integer, AtomicLong> entry : offset.offsetMap.entrySet()) {
+    for (Entry<Integer, Long> entry : offset.offsetMap.entrySet()) {
       Assert.assertEquals(1, entry.getKey().intValue());
       Assert.assertEquals(2L, entry.getValue().longValue());
     }
