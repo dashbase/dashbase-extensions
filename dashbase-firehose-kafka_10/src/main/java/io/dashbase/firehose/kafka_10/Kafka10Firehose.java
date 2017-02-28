@@ -1,5 +1,6 @@
 package io.dashbase.firehose.kafka_10;
 
+import it.unimi.dsi.fastutil.ints.Int2LongOpenHashMap;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.Map;
@@ -40,8 +41,6 @@ public class Kafka10Firehose extends RapidFirehose {
   static final int DEFAULT_POLL_INTERVAL_MS = 100;
 
   private KafkaOffset offset = new KafkaOffset();
-  private int currentPartition = -1;
-  private AtomicLong currentOffset = new AtomicLong(0L);
 
   private final ObjectMapper mapper = new ObjectMapper();
 
@@ -63,18 +62,7 @@ public class Kafka10Firehose extends RapidFirehose {
       ConsumerRecord<byte[], byte[]> record = batchIterator.next();
       int recordPartition = record.partition();
       long recordOffset = record.offset();
-      if (currentPartition == recordPartition) {
-        currentOffset.set(Math.max(currentOffset.get(), recordOffset));
-      } else {
-        currentPartition = recordPartition;
-        currentOffset = offset.offsetMap.get(recordPartition);
-        if (currentOffset == null) {
-          currentOffset = new AtomicLong(recordOffset);
-          offset.offsetMap.put(recordPartition, currentOffset);
-        } else {
-          currentOffset.set(Math.max(currentOffset.get(), recordOffset));
-        }
-      }
+      offset.offsetMap.put(recordPartition, recordOffset);
       return record.value();
     }
   }
@@ -120,9 +108,9 @@ public class Kafka10Firehose extends RapidFirehose {
 
   public void seekToOffset(String offsetString) throws IOException {
     offset = mapper.readValue(offsetString, KafkaOffset.class);
-    for (Entry<Integer, AtomicLong> entry : offset.offsetMap.entrySet()) {
+    for (Entry<Integer, Long> entry : offset.offsetMap.entrySet()) {
       TopicPartition topicPartition = new TopicPartition(config.topic, entry.getKey());
-      consumer.seek(topicPartition, entry.getValue().get() + 1);
+      consumer.seek(topicPartition, entry.getValue() + 1);
     }
   }
 

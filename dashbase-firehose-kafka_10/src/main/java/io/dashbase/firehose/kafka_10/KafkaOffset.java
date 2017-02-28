@@ -1,9 +1,7 @@
 package io.dashbase.firehose.kafka_10;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicLong;
+import it.unimi.dsi.fastutil.ints.Int2LongOpenHashMap;
 
 public class KafkaOffset {
-  public Map<Integer, AtomicLong> offsetMap = new HashMap<>();
+  public Int2LongOpenHashMap offsetMap = new Int2LongOpenHashMap();
 }
