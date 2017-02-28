@@ -46,7 +46,7 @@ public class Kafka10Firehose extends RapidFirehose {
   private final ObjectMapper mapper = new ObjectMapper();
 
   public byte[] doNext() throws IOException {
-    if (batchIterator == null || !batchIterator.hasNext()) {
+    if (batchIterator == null) {
       ConsumerRecords<byte[], byte[]> batch = null;
       while (!stop) {
         batch = consumer.poll(config.pollIntervalMs);
