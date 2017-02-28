@@ -19,13 +19,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.codahale.metrics.Gauge;
-import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricRegistry;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Maps;
 
 import rapid.firehose.RapidFirehose;
 
@@ -48,17 +46,11 @@ public class Kafka10Firehose extends RapidFirehose {
   private final ObjectMapper mapper = new ObjectMapper();
 
   public byte[] doNext() throws IOException {
-    if (batchIterator == null) {
+    if (batchIterator == null || !batchIterator.hasNext()) {
       ConsumerRecords<byte[], byte[]> batch = null;
       while (!stop) {
         batch = consumer.poll(config.pollIntervalMs);
-        if (batch == null || batch.isEmpty()) {
-          try {
-            Thread.sleep(1000);
-          } catch (InterruptedException e) {
-            return null;
-          }
-        } else {
+        if (batch != null && !batch.isEmpty()) {
           break;
         }
       }
@@ -130,7 +122,7 @@ public class Kafka10Firehose extends RapidFirehose {
     offset = mapper.readValue(offsetString, KafkaOffset.class);
     for (Entry<Integer, AtomicLong> entry : offset.offsetMap.entrySet()) {
       TopicPartition topicPartition = new TopicPartition(config.topic, entry.getKey());
-      consumer.seek(topicPartition, entry.getValue().get());
+      consumer.seek(topicPartition, entry.getValue().get() + 1);
     }
   }
 
