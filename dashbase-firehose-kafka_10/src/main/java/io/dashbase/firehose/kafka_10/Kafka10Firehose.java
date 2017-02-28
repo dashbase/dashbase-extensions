@@ -33,7 +33,6 @@ public class Kafka10Firehose extends RapidFirehose {
   private static final Logger logger = LoggerFactory.getLogger(Kafka10Firehose.class);
 
   KafkaFirehoseConfig config;
-  private volatile boolean stop = false;
 
   private Consumer<byte[], byte[]> consumer;
   private Iterator<ConsumerRecord<byte[], byte[]>> batchIterator = null;
@@ -45,9 +44,9 @@ public class Kafka10Firehose extends RapidFirehose {
   private final ObjectMapper mapper = new ObjectMapper();
 
   public byte[] doNext() throws IOException {
-    if (batchIterator == null) {
+    if (batchIterator == null || !batchIterator.hasNext()) {
       ConsumerRecords<byte[], byte[]> batch = null;
-      while (!stop) {
+      while (!Thread.currentThread().isInterrupted()) {
         batch = consumer.poll(config.pollIntervalMs);
         if (batch != null && !batch.isEmpty()) {
           break;
@@ -55,16 +54,10 @@ public class Kafka10Firehose extends RapidFirehose {
       }
       batchIterator = batch.iterator();
     }
-    if (!batchIterator.hasNext()) {
-      batchIterator = null;
-      return doNext();
-    } else {
-      ConsumerRecord<byte[], byte[]> record = batchIterator.next();
-      int recordPartition = record.partition();
-      long recordOffset = record.offset();
-      offset.offsetMap.put(recordPartition, recordOffset);
-      return record.value();
-    }
+
+    ConsumerRecord<byte[], byte[]> record = batchIterator.next();
+    offset.offsetMap.put(record.partition(), record.offset());
+    return record.value();
   }
 
   private static KafkaConsumer<byte[], byte[]> buildConsumer(KafkaFirehoseConfig config) {
@@ -84,12 +77,7 @@ public class Kafka10Firehose extends RapidFirehose {
   }
 
   public void shutdown() throws Exception {
-    try {
-      stop = true;
-      Thread.currentThread().interrupt();
-    } finally {
-      consumer.close();
-    }
+    consumer.close();
   }
 
   @VisibleForTesting
