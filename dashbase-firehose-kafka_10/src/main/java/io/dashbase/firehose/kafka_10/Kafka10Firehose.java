@@ -1,12 +1,10 @@
 package io.dashbase.firehose.kafka_10;
 
-import it.unimi.dsi.fastutil.ints.Int2LongOpenHashMap;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
-import java.util.concurrent.atomic.AtomicLong;
 
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
