@@ -113,13 +113,8 @@ public class Kafka10Firehose extends RapidFirehose {
     Map<MetricName, ? extends Metric> metrics = this.consumer.metrics();
     for (final Entry<MetricName, ? extends Metric> entry : metrics.entrySet()) {
       MetricName metricName = entry.getKey();
-      StringBuilder key = new StringBuilder();
-
-      key.append("firehose.kafka.")
-        .append(metricName.group()).append(".")
-        .append(metricName.name());
-
-      metricRegistry.register(key.toString(), (Gauge<Double>) () -> entry.getValue().value());
+      String key = "firehose.kafka." + metricName.group() + "." + metricName.name();
+      metricRegistry.register(key, (Gauge<Double>) () -> entry.getValue().value());
     }
   }
 
