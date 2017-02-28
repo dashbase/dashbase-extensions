@@ -56,7 +56,7 @@ public class Kafka10Firehose extends RapidFirehose {
           try {
             Thread.sleep(1000);
           } catch (InterruptedException e) {
-            continue;
+            return null;
           }
         } else {
           break;
@@ -64,7 +64,10 @@ public class Kafka10Firehose extends RapidFirehose {
       }
       batchIterator = batch.iterator();
     }
-    if (batchIterator.hasNext()) {
+    if (!batchIterator.hasNext()) {
+      batchIterator = null;
+      return doNext();
+    } else {
       ConsumerRecord<byte[], byte[]> record = batchIterator.next();
       int recordPartition = record.partition();
       long recordOffset = record.offset();
@@ -81,9 +84,6 @@ public class Kafka10Firehose extends RapidFirehose {
         }
       }
       return record.value();
-    } else {
-      batchIterator = null;
-      return doNext();
     }
   }
 
