@@ -43,13 +43,13 @@ public class Kafka10Firehose extends RapidFirehose {
 
   public byte[] doNext() throws IOException {
     if (batchIterator == null || !batchIterator.hasNext()) {
-      ConsumerRecords<byte[], byte[]> batch = null;
-      while (!Thread.currentThread().isInterrupted()) {
-        batch = consumer.poll(config.pollIntervalMs);
-        if (batch != null && !batch.isEmpty()) {
-          break;
+      ConsumerRecords<byte[], byte[]> batch;
+      do {
+        if (Thread.currentThread().isInterrupted()) {
+          return null;
         }
-      }
+        batch = consumer.poll(config.pollIntervalMs);
+      } while (batch == null || batch.isEmpty());
       batchIterator = batch.iterator();
     }
 
@@ -63,6 +63,7 @@ public class Kafka10Firehose extends RapidFirehose {
     props.putAll(config.kafkaProps);
     props.put("bootstrap.servers", config.hosts);
     props.put("group.id", config.groupId);
+    props.put("enable.auto.commit", config.enableAutoCommit);
     props.put("key.deserializer", ByteArrayDeserializer.class.getName());
     props.put("value.deserializer", ByteArrayDeserializer.class.getName());
     props.put("enable.auto.commit", "false");
@@ -101,7 +102,6 @@ public class Kafka10Firehose extends RapidFirehose {
   }
 
   public String getOffset() throws IOException {
-    consumer.commitAsync();
     return mapper.writeValueAsString(offset);
   }
 

@@ -32,7 +32,7 @@ public class Kafka10CollectorSink extends CollectorSink {
   private Producer<byte[], byte[]> producer = null;
 
   @Override
-  protected void doAdd(String name, Map<String, String> params, byte[] data, boolean isBatch)
+  public void doAdd(String name, Map<String, String> params, byte[] data, boolean isBatch)
       throws Exception {
     logger.info(params.toString());
     if (isBatch) {
