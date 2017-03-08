@@ -3,6 +3,9 @@
 bin=`dirname "$0"`
 bin=`cd "$bin"; pwd`
 
+cd $bin/..
+mvn clean install
+
 if [ -z ${ZEPPELIN_HOME} ]; 
 then 
 	echo "ZEPPELIN_HOME is not set"

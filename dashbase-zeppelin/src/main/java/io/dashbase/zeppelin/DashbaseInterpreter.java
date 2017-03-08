@@ -1,14 +1,13 @@
 package io.dashbase.zeppelin;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
+import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.http.HttpHeaders;
 import org.apache.zeppelin.interpreter.Interpreter;
 import org.apache.zeppelin.interpreter.InterpreterContext;
 import org.apache.zeppelin.interpreter.InterpreterResult;
@@ -16,15 +15,17 @@ import org.apache.zeppelin.interpreter.thrift.InterpreterCompletion;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.mashape.unirest.http.HttpResponse;
-import com.mashape.unirest.http.Unirest;
+import com.google.common.collect.ImmutableSet;
 
+import io.dashbase.client.DashbaseService;
+import io.dashbase.client.http.HttpClientService;
 import io.dashbase.zeppelin.util.DashbaseInterpreterUtil;
-import rapid.api.RapidRequest;
 import rapid.api.RapidResponse;
 import rapid.api.RapidServiceInfo;
-import rapid.api.query.StringQuery;
+import retrofit2.Call;
+import retrofit2.Response;
 
 public class DashbaseInterpreter extends Interpreter {
   
@@ -33,16 +34,14 @@ public class DashbaseInterpreter extends Interpreter {
   private static final int DEFAULT_CONNECTION_TIMEOUT = 10000;
   private static final int DEFAULT_SOCKET_TIMEOUT = 60000;
   
-  private static final String QUERY_URI = "/query";
-  private static final String SQL_URI = "/sql";
-  private static final String GET_INFO_URI = "/get-info";
+  private HttpClientService svc = null;
   
   private static final String HELP = "Dashbase interpreter:\n"
       + "General format: <command> <option>\n"
       + "Commands:\n"
       + "  - help \n"
       + "    . this message\n"
-      + "  - info\n"
+      + "  - info <table1,table2...>\n"
       + "    . shows schema information\n"
       + "  - search <query>\n"
       + "    . performs full text query\n"
@@ -50,11 +49,6 @@ public class DashbaseInterpreter extends Interpreter {
       + "    . performs SQL query";
   
   private String dashbaseUrl = null;
-  private String queryUrl;
-  private String sqlUrl;
-  private String getInfoUrl;  
-
-  private final ObjectMapper objMapper = new ObjectMapper();  
   
   protected static final List<String> COMMANDS = Arrays.asList(
       "tables", "info", "sql", "help", "search");
@@ -91,12 +85,7 @@ public class DashbaseInterpreter extends Interpreter {
 
 	@Override
 	public void close() {
-	  logger.info("shutting down dashbase interpreter");
-	  try {
-      Unirest.shutdown();
-    } catch (IOException e) {
-      logger.error("problem shutting unirest", e);
-    }
+	  logger.info("shutting down dashbase interpreter");	  
 	  logger.info("dashbase interpreter shutdown");
 	}
 
@@ -106,35 +95,25 @@ public class DashbaseInterpreter extends Interpreter {
 	}
 
 	@Override
-	public int getProgress(InterpreterContext interpreterContext) {	  
-		// TODO Auto-generated method stub
+	public int getProgress(InterpreterContext interpreterContext) {
 		return 0;
 	}
 	
-	private InterpreterResult handleGetInfo() {
+	private InterpreterResult handleGetInfo(Set<String> names) {
 	  try {
-	    
-	    HttpResponse<InputStream> response = Unirest.post(getInfoUrl)
-        .header(HttpHeaders.CONTENT_TYPE,"application/json; charset=utf-8").asBinary();
-      RapidServiceInfo info =  objMapper.readValue(response.getBody(), RapidServiceInfo.class);
+      RapidServiceInfo info =  svc.query().getInfo(names).execute().body();
       return DashbaseInterpreterUtil.toInterpretedGetInfo(info);
 	  } catch(Exception e) {
       return DashbaseInterpreterUtil.exception(e);
     }  
 	}
 	
-	private InterpreterResult handleSearch(String query, InterpreterContext interpreterContext) {
-	  
-	  RapidRequest req = new RapidRequest();
-	  req.query = new StringQuery(query);
-	  req.numResults = 10;
-	  
+	private InterpreterResult handleSearch(String query, InterpreterContext interpreterContext) {	  
 	  try {
-	    ObjectMapper mapper = new ObjectMapper();
-	    String queryJson = mapper.writeValueAsString(req);
-      HttpResponse<InputStream> response = Unirest.post(queryUrl)
-        .header(HttpHeaders.CONTENT_TYPE,"application/json; charset=utf-8").body(queryJson).asBinary();    
-      RapidResponse resp =  objMapper.readValue(response.getBody(), RapidResponse.class);
+	    Call<RapidResponse> callResp = svc.query().search(query);
+	    Response<RapidResponse> rapidResp = callResp.execute();
+	    logger.info(String.valueOf(rapidResp.message()));
+      RapidResponse resp =  rapidResp.body();
       return DashbaseInterpreterUtil.toInterpretedSearchResult(resp);
     } catch(Exception e) {
       return DashbaseInterpreterUtil.exception(e);
@@ -145,10 +124,8 @@ public class DashbaseInterpreter extends Interpreter {
 	  if (sql == null || sql.trim().length() == 0) {
 	    return new InterpreterResult(InterpreterResult.Code.SUCCESS);
 	  }
-	  try {
-	    HttpResponse<InputStream> response = Unirest.post(sqlUrl)
-        .header(HttpHeaders.CONTENT_TYPE,"application/json; charset=utf-8").body(sql).asBinary();    
-      RapidResponse resp =  objMapper.readValue(response.getBody(), RapidResponse.class);
+	  try {    
+      RapidResponse resp = svc.query().sql(sql).execute().body();
       return DashbaseInterpreterUtil.toInterpretedSqlResult(resp);
 	  } catch(Exception e) {
 	    return DashbaseInterpreterUtil.exception(e);
@@ -175,7 +152,10 @@ public class DashbaseInterpreter extends Interpreter {
       return handleSql(DashbaseInterpreterUtil.concatArgs(items), interpreterContext);
     }
     if ("info".equalsIgnoreCase(command)) {
-      return handleGetInfo();
+      String nameList = DashbaseInterpreterUtil.concatArgs(items);
+      Set<String> names = nameList == null ? Collections.emptySet() : 
+        ImmutableSet.copyOf(Arrays.asList(nameList.split(",")));
+      return handleGetInfo(names);
     }
     if ("search".equalsIgnoreCase(command)) {
       return handleSearch(DashbaseInterpreterUtil.concatArgs(items), interpreterContext);
@@ -203,13 +183,8 @@ public class DashbaseInterpreter extends Interpreter {
 
 	@Override
 	public void open() {
-	  logger.info("starting dashbase interpreter");
+	  logger.info("starting dashbase interpreter");	  
 	  dashbaseUrl = getProperty(DASHBASE_URL);
-	  if (!dashbaseUrl.startsWith("http://")) {
-	    StringBuilder buf = new StringBuilder();
-	    buf.append("http://").append(dashbaseUrl);
-	    dashbaseUrl = buf.toString();
-	  }
 	  
 	  long connectionTimeout;
 	  try {
@@ -219,17 +194,13 @@ public class DashbaseInterpreter extends Interpreter {
 	  }
 	  
 	  long socketTimeout;
-    try {
-      socketTimeout = Long.parseLong(getProperty(DASHBASE_SOCKET_TIMEOUT));
-    } catch(Exception e) {
-      socketTimeout = DEFAULT_SOCKET_TIMEOUT;
-    }
-	  
-	  Unirest.setTimeouts(connectionTimeout, socketTimeout);	  
-    
-    queryUrl = dashbaseUrl + QUERY_URI;
-    getInfoUrl = dashbaseUrl + GET_INFO_URI;
-    sqlUrl = dashbaseUrl + SQL_URI;
+      try {
+        socketTimeout = Long.parseLong(getProperty(DASHBASE_SOCKET_TIMEOUT));
+      } catch(Exception e) {
+        socketTimeout = DEFAULT_SOCKET_TIMEOUT;
+      }
+      
+      svc = new HttpClientService(dashbaseUrl);
 	  logger.info("dashbase interpreter started");
-	}
+	}	
 }
