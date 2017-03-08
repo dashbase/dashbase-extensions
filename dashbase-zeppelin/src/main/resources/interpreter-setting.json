@@ -1,0 +1,30 @@
+[
+  {
+    "group": "dashbase",
+    "name": "dashbase",
+    "className": "io.dashbase.zeppelin.DashbaseInterpreter",
+    "properties": {
+      "dashbase.url": {
+        "envName": "DASHBASE_URL",
+        "propertyName": "dashbase.url",
+        "defaultValue": "localhost:7888",
+        "description": "Dashbase url. Default = localhost:7888"
+      },
+      "dashbase.connection.timeout": {
+        "envName": "DASHBASE_CONNECTION_TIMEOUT",
+        "propertyName": "dashbase.connection.timeout",
+        "defaultValue": "10000",
+        "description": "Connection timeout in milliseconds. Default = 10000"
+      },
+      "dashbase.socket.timeout": {
+        "envName": "DASHBASE_SOCKET_TIMEOUT",
+        "propertyName": "dashbase.socket.timeout",
+        "defaultValue": "60000",
+        "description": "Socket timeout in milliseconds. Default = 60000"
+      }
+    },
+    "editor": {
+      "editOnDblClick": false
+    }
+  }
+]
