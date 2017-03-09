@@ -81,4 +81,11 @@
 		      <scope>provided</scope>
 		</dependency>
 	</dependencies>
+	<repositories>
+	    <repository>
+	           <id>dashbase</id>
+	           <name>dashbase</name>
+	           <url>http://maven.dashbase.io</url>
+	    </repository>
+	</repositories>
 </project>
