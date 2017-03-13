@@ -1,13 +1,18 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.0.0</modelVersion>
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
 
-    <groupId>io.dashbase.extensions</groupId>
-    <artifactId>dashbase-firehose-syslog</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
-    <packaging>jar</packaging>
-    <name>Dashbase Firehose Extension as a Syslog server</name>
-
+	<groupId>io.dashbase</groupId>
+	<artifactId>dashbase-zeppelin</artifactId>
+	<version>0.0.1-SNAPSHOT</version>	
+	<packaging>jar</packaging>
+	<name>Dashbase Zeppelin</name>
+	
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<jackson.version>2.7.8</jackson.version>
+	</properties>
+	
     <build>
         <plugins>
             <plugin>
@@ -51,53 +56,36 @@
                 </executions>
             </plugin>
         </plugins>
-		<extensions>
-		   <!-- Enabling the use of FTP -->
-		   <extension>
-		      <groupId>org.apache.maven.wagon</groupId>
-		      <artifactId>wagon-ftp</artifactId>
-		      <version>2.10</version>
-		   </extension>
-		</extensions>
+		<resources>
+		    <resource>
+		        <directory>src/main/resources</directory>
+		    </resource>
+		</resources>
     </build>
-
-    <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    </properties>
-    <repositories>
-        <repository>
-            <id>dashbase_maven</id>
-            <url>http://enterprise.dashbase.io:8079/maven2/</url>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
-        </repository>
-    </repositories>
-    <dependencies>
-        <dependency>
-            <groupId>io.dashbase</groupId>
-            <artifactId>dashbase-sdk</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.graylog2</groupId>
-            <artifactId>syslog4j</artifactId>
-            <version>0.9.55</version>
-		</dependency>
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
-            <version>1.7.5</version>
-            <scope>provided</scope>
-        </dependency>
-    </dependencies>
 	
-  
-    <distributionManagement>
-      <repository>
-        <id>dashbase-ftp</id>
-        <url>ftp://enterprise.dashbase.io/var/www/html/maven2</url>
-      </repository>
-    </distributionManagement>
+	<dependencies>
+	   <dependency>
+		    <groupId>io.dashbase</groupId>
+		    <artifactId>dashbase-client</artifactId>
+		    <version>0.0.1-SNAPSHOT</version>
+		</dependency>
+	    <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>${jackson.version}</version>
+        </dependency>
+		<dependency>
+		      <groupId>org.apache.zeppelin</groupId>
+		      <artifactId>zeppelin-interpreter</artifactId>
+		      <version>0.7.0</version>
+		      <scope>provided</scope>
+		</dependency>
+	</dependencies>
+	<repositories>
+	    <repository>
+	           <id>dashbase</id>
+	           <name>dashbase</name>
+	           <url>http://maven.dashbase.io</url>
+	    </repository>
+	</repositories>
 </project>

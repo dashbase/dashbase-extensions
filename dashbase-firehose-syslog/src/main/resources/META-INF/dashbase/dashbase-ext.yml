@@ -1,0 +1,4 @@
+extensions:
+  - type: firehose
+    name: syslog
+    clazz: io.dashbase.firehose.syslog.SyslogFirehose

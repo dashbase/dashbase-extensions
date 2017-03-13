@@ -1,0 +1,4 @@
+extensions:
+  - type: firehose
+    name: nsq
+    clazz:  io.dashbase.firehose.nsq.NSQFirehose
