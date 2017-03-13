@@ -1,6 +1,0 @@
-{
-    "clazz": "io.dashbase.firehose.http.HttpFirehose",
-    "params": {
-        "port": 9999
-    }
-}

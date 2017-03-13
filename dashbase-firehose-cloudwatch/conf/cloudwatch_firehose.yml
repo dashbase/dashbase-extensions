@@ -1,0 +1,4 @@
+type: cloudwatch
+params:
+  group: myGrouop
+  stream: myStream
