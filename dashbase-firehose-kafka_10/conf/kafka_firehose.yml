@@ -1,0 +1,5 @@
+type: kafka_10
+params:
+  hosts: localhost:9092
+  groupId: myGrouop
+  topic: myTopic

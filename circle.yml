@@ -1,0 +1,46 @@
+machine:
+  timezone: UTC
+  java:
+    version: oraclejdk8
+
+experimental:
+  notify:
+    branches:
+      only:
+        - master
+
+dependencies:
+  pre:
+    - sudo apt-get update
+    - ulimit -c
+    - ulimit -c unlimited -S
+
+# Run these bash commands instead of CircleCI's inferred commands
+  override:
+    - cd dashbase-firehose-http && mvn compile
+    - cd dashbase-firehose-cloudwatch && mvn compile
+    - cd dashbase-firehose-kafka_10 && mvn compile
+    - cd dashbase-firehose-nsq && mvn compile
+    - cd dashbase-firehose-syslog && mvn compile
+
+# Cache the resolution-cache and build streams to speed things up
+  cache_directories:
+    - "target/resolution-cache"
+    - "target/streams"
+    - "project/target/resolution-cache"
+    - "project/target/streams"
+
+test:
+  # Run this bash command instead of CircleCI's inferred commands
+  override:
+    - cd dashbase-firehose-http && mvn test
+    - cd dashbase-firehose-cloudwatch && mvn test
+    - cd dashbase-firehose-kafka_10 && mvn test
+    - cd dashbase-firehose-nsq && mvn test
+    - cd dashbase-firehose-syslog && mvn test
+
+  # Run these commands after the "override" commands
+  post:
+    # Copy test reports to Circle test reports dir
+    - mkdir -p $CIRCLE_TEST_REPORTS/junit/
+    - find . -type f -regex ".*/target/test-reports/.*xml" -exec cp {} $CIRCLE_TEST_REPORTS/junit/ \;
