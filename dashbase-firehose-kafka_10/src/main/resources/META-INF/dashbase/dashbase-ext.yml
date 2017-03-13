@@ -1,0 +1,4 @@
+extensions:
+  - type: firehose
+    name: kafka10
+    clazz: io.dashbase.firehose.kafka_10.Kafka10Firehose

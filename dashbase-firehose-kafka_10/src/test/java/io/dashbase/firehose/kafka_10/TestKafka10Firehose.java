@@ -1,12 +1,8 @@
 package io.dashbase.firehose.kafka_10;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.collect.ImmutableSet;
-import it.unimi.dsi.fastutil.ints.Int2LongOpenHashMap;
 import java.util.Map;
-
 import java.util.Map.Entry;
-import java.util.concurrent.atomic.AtomicLong;
+
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.MockConsumer;
 import org.apache.kafka.clients.consumer.OffsetResetStrategy;
@@ -14,9 +10,12 @@ import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.record.TimestampType;
 import org.junit.Test;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Charsets;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 
+import it.unimi.dsi.fastutil.ints.Int2LongOpenHashMap;
 import junit.framework.Assert;
 
 public class TestKafka10Firehose {
