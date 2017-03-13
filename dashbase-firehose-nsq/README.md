@@ -5,14 +5,14 @@ NSQ if a realtime distributed messaging platform, See details here: [http://nsq.
 Installation instructions:
 
 1. mvn clean package
-2. cp target/dashbse-firehose-nsq-0.0.1-SNAPSHOT.jar $DASHBASE_HOME/dashbase/target/lib
+2. mvn install
 
-You are now able to reference it via the *clazz* param, see [Example conf file](https://github.com/dashbase/dashbase-extensions/blob/master/dashbase-firehose-nsq/conf/nsq_firehose.json)
+You are now able to reference it via the *type* param, see [Example conf file](https://github.com/dashbase/dashbase-extensions/blob/master/dashbase-firehose-nsq/conf/nsq_firehose.yml)
 
 You can now test it via the firehose_runner.sh tool:
 
 ~~~~
-$DASHBASE_HOME/dashbase/bin/firehose_runner.sh $(pwd)/conf/nsq_firehose.json
+$DASHBASE_HOME/dashbase/bin/firehose_runner.sh $(pwd)/conf/nsq_firehose.yml
 ~~~~
 
 
