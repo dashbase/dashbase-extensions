@@ -1,0 +1,4 @@
+extensions:
+  - type: firehose
+    name: cloudwatch
+    clazz: io.dashbase.firehose.cloudwatch.CloudWatchFirehose
