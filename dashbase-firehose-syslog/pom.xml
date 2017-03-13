@@ -84,4 +84,12 @@
             <scope>provided</scope>
         </dependency>
     </dependencies>
+	
+  
+    <distributionManagement>
+      <repository>
+        <id>dashbase-ftp</id>
+        <url>ftp://enterprise.dashbase.io/var/www/html/maven2</url>
+      </repository>
+    </distributionManagement>
 </project>
