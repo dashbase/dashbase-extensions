@@ -5,7 +5,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
-import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.zeppelin.interpreter.Interpreter;
@@ -15,11 +14,6 @@ import org.apache.zeppelin.interpreter.thrift.InterpreterCompletion;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.fasterxml.jackson.databind.JavaType;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.collect.ImmutableSet;
-
-import io.dashbase.client.DashbaseService;
 import io.dashbase.client.http.HttpClientService;
 import io.dashbase.zeppelin.util.DashbaseInterpreterUtil;
 import rapid.api.RapidResponse;
@@ -99,7 +93,7 @@ public class DashbaseInterpreter extends Interpreter {
 		return 0;
 	}
 	
-	private InterpreterResult handleGetInfo(Set<String> names) {
+	private InterpreterResult handleGetInfo(List<String> names) {
 	  try {
       RapidServiceInfo info =  svc.query().getInfo(names).execute().body();
       return DashbaseInterpreterUtil.toInterpretedGetInfo(info);
@@ -108,9 +102,9 @@ public class DashbaseInterpreter extends Interpreter {
     }  
 	}
 	
-	private InterpreterResult handleSearch(String query, InterpreterContext interpreterContext) {	  
-	  try {
-	    Call<RapidResponse> callResp = svc.query().search(query);
+	private InterpreterResult handleSearch(String name, String query, InterpreterContext interpreterContext) {	  
+	  try {	    
+	    Call<RapidResponse> callResp = svc.query().search(name, query, 10);
 	    Response<RapidResponse> rapidResp = callResp.execute();
 	    logger.info(String.valueOf(rapidResp.message()));
       RapidResponse resp =  rapidResp.body();
@@ -153,12 +147,23 @@ public class DashbaseInterpreter extends Interpreter {
     }
     if ("info".equalsIgnoreCase(command)) {
       String nameList = DashbaseInterpreterUtil.concatArgs(items);
-      Set<String> names = nameList == null ? Collections.emptySet() : 
-        ImmutableSet.copyOf(Arrays.asList(nameList.split(",")));
+      List<String> names = nameList == null ? Collections.emptyList() : 
+        Arrays.asList(nameList.split(","));
       return handleGetInfo(names);
     }
     if ("search".equalsIgnoreCase(command)) {
-      return handleSearch(DashbaseInterpreterUtil.concatArgs(items), interpreterContext);
+      String fullargs = DashbaseInterpreterUtil.concatArgs(items);
+      int idx = fullargs.indexOf(" ");
+      String name = null;
+      String query = null;
+      if (idx > 0) {
+        name = fullargs.substring(0, idx);
+        query = fullargs.substring(idx + 1, fullargs.length());
+      } else {
+        name = null;
+        query = fullargs;
+      }
+      return handleSearch(name, query, interpreterContext);
     }
     if ("help".equalsIgnoreCase(command)) {
       return processHelp(InterpreterResult.Code.SUCCESS, null);
