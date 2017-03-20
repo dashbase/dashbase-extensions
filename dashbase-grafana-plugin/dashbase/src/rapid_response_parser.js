@@ -14,7 +14,6 @@ export class RapidResponseParser {
 		}
 
 		if (sentTargets[0].type == "timeseries") { // graph format
-
 			target = this.response.data.aggregations[sentTargets[0].alias]; // change to i for when implementing support for multi queries per graph
 			if (!target) { 
 				this.response.data = []; // no aggregation response, likely due to no data within timerange
@@ -23,7 +22,7 @@ export class RapidResponseParser {
 
 			// HISTOGRAM RESPONSE
 			if (target.histogramBuckets) {
-				var buckets = target.histogramBuckets;
+        var buckets = target.histogramBuckets;
 				dataArr.push({
 					"target": sentTargets[0].alias,
 					"datapoints": _.map(buckets, bucket => {
