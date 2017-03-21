@@ -48,9 +48,6 @@ public class InfluxDBLineProtocolParser implements RapidIngesterParser {
     StringTokenizer strtok = new StringTokenizer(pair, "=");
     String name = strtok.nextToken();
     String val = strtok.nextToken();
-    if (val.endsWith("i")) {
-      val = val.substring(0, val.length() - 1);
-    }
     
     content.put(name, val);
     if (!schemaMap.containsKey(name)) {
@@ -65,6 +62,10 @@ public class InfluxDBLineProtocolParser implements RapidIngesterParser {
     StringTokenizer strtok = new StringTokenizer(pair, "=");
     String name = strtok.nextToken();
     String val = strtok.nextToken();
+    
+    if (val.endsWith("i")) {
+      val = val.substring(0, val.length() - 1);
+    }
     
     content.put(name, val);
     if (!schemaMap.containsKey(name)) {
