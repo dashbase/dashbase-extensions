@@ -1,0 +1,4 @@
+extensions:
+  - type: parser
+    name: influxdb
+    clazz: io.dashbase.parsers.InfluxDBLineProtocolParser
