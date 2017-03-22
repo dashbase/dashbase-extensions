@@ -8,19 +8,19 @@ module.exports = function(grunt) {
 
   grunt.initConfig({
 
-    clean: ["dist"],
+    clean: ["dashbase/dist"],
 
     copy: {
       src_to_dist: {
         cwd: 'src',
         expand: true,
         src: ['**/*', '!**/*.js', '!**/*.scss'],
-        dest: 'dist'
+        dest: 'dashbase/dist'
       },
       pluginDef: {
         expand: true,
         src: ['README.md'],
-        dest: 'dist'
+        dest: 'dashbase/dist'
       }
     },
 
@@ -45,7 +45,7 @@ module.exports = function(grunt) {
           cwd: 'src',
           expand: true,
           src: ['**/*.js'],
-          dest: 'dist',
+          dest: 'dashbase/dist',
           ext:'.js'
         }]
       },
@@ -54,7 +54,7 @@ module.exports = function(grunt) {
           cwd: 'src',
           expand: true,
           src: ['**/*.js'],
-          dest: 'dist/test',
+          dest: 'dashbase/dist/test',
           ext:'.js'
         }]
       },
@@ -63,7 +63,7 @@ module.exports = function(grunt) {
           expand: true,
           cwd: 'spec',
           src: ['**/*.js'],
-          dest: 'dist/test/spec',
+          dest: 'dashbase/dist/test/spec',
           ext:'.js'
         }]
       }
@@ -76,7 +76,7 @@ module.exports = function(grunt) {
           archive: 'target/dashbase-grafana-datasource-0.0.1.tar.gz'
         },
         files: [
-          { src: ['dist/**']}
+          { src: ['dashbase/dist/**']}
         ]
       }
     }
