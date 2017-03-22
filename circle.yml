@@ -21,14 +21,13 @@ dependencies:
     - sudo curl -o /usr/local/bin/ecs-cli https://s3.amazonaws.com/amazon-ecs-cli/ecs-cli-linux-amd64-latest
     - sudo chmod +x /usr/local/bin/ecs-cli
     - ecs-cli --version
-    - sudo npm install grunt -g
     - ulimit -c
     - ulimit -c unlimited -S
 
 # Run these bash commands instead of CircleCI's inferred commands
   override:
     - cd dashbase-grafana && npm install
-    - cd dashbase-grafana && grunt clean copy
+    - cd dashbase-grafana && ./node_modules/grunt-cli/bin/grunt clean copy
     - cd dashbase-firehose-cloudwatch && mvn compile
     - cd dashbase-firehose-kafka_10 && mvn compile
     - cd dashbase-firehose-nsq && mvn compile
@@ -45,7 +44,7 @@ dependencies:
 test:
   # Run this bash command instead of CircleCI's inferred commands
   override:
-    - cd dashbase-grafana && grunt babel
+    - cd dashbase-grafana && ./node_modules/grunt-cli/bin/grunt babel
     - cd dashbase-firehose-cloudwatch && mvn test
     - cd dashbase-firehose-kafka_10 && mvn test
     - cd dashbase-firehose-nsq && mvn test
@@ -61,6 +60,6 @@ deployment:
   master:
     branch: master
     commands:
-      - cd dashbase-grafana && grunt compress
+      - cd dashbase-grafana && ./node_modules/grunt-cli/bin/grunt compress
       # Run a script that deploys to S3 and updates builds
       - ./bin/deploy.sh
