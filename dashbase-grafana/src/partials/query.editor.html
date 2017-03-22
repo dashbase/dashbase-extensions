@@ -1,0 +1,16 @@
+<query-editor-row query-ctrl="ctrl" has-text-edit-mode="true">
+	<div class="gf-form">
+		<select class="gf-form-label max-width-7" ng-model="ctrl.target.type">
+			<option selected value="timeseries">TIMESERIES</option>
+			<option value="table">TABLE</option>
+		</select>
+		<label class="gf-form-label">SELECT</label>
+		<input type="text" class="gf-form-input max-width-10" ng-model="ctrl.target.target" spellcheck="false" placeholder="" ng-blur="ctrl.refresh()"/>
+		<label class="gf-form-label">ALIAS</label>
+		<input type="text" class="gf-form-input max-width-10" ng-model="ctrl.target.alias" spellcheck="false" placeholder="(OPTIONAL)" ng-blur="ctrl.refresh()"/>
+		<label class="gf-form-label">WHERE</label>
+		<input type="text" class="gf-form-input" ng-model="ctrl.target.query" spellcheck="false" placeholder="(OPTIONAL)" ng-blur="ctrl.refresh()"/>
+		<label class="gf-form-label">LIMIT</label>
+		<input type="text" class="gf-form-input max-width-5" ng-model="ctrl.target.limit" spellcheck="false" ng-blur="ctrl.refresh()"/>
+	</div>
+</query-editor-row>
