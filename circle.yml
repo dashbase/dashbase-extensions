@@ -18,7 +18,7 @@ dependencies:
 # Run these bash commands instead of CircleCI's inferred commands
   override:
     - cd dashbase-zeppelin && mvn compile
-    - cd dashbase-grafana && grunt
+    - cd dashbase-grafana && grunt clean copy
     - cd dashbase-firehose-cloudwatch && mvn compile
     - cd dashbase-firehose-kafka_10 && mvn compile
     - cd dashbase-firehose-nsq && mvn compile
@@ -52,6 +52,6 @@ deployment:
     branch: master
     commands:
       - cd dashbase-zeppelin && mvn package
-      - cd dashbase-grafana && grunt
+      - cd dashbase-grafana && grunt compress
       # Run a script that deploys to S3 and updates builds
       - ./bin/deploy.sh

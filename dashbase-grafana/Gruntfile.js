@@ -73,7 +73,7 @@ module.exports = function(grunt) {
       main: {
         options: {
           mode: 'tgz',
-          archive: 'target/dashbase-grafana-datasource.tar.gz'
+          archive: 'target/dashbase-grafana-datasource-0.0.1.tar.gz'
         },
         files: [
           { src: ['dist/**']}

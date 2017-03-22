@@ -21,8 +21,8 @@
     "links": [
       {"name": "dashbase.io", "url": "http://www.dashbase.io"}
     ],
-    "version": "1.0.0",
-    "updated": "2017-01-05"
+    "version": "0.0.1",
+    "updated": "2017-03-22"
   },
 
   "annotations": false,
