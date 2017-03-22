@@ -17,7 +17,8 @@ dependencies:
 
 # Run these bash commands instead of CircleCI's inferred commands
   override:
-    - cd dashbase-firehose-http && mvn compile
+    - cd dashbase-zeppelin && mvn compile
+    - cd dashbase-grafana && grunt
     - cd dashbase-firehose-cloudwatch && mvn compile
     - cd dashbase-firehose-kafka_10 && mvn compile
     - cd dashbase-firehose-nsq && mvn compile
@@ -33,7 +34,8 @@ dependencies:
 test:
   # Run this bash command instead of CircleCI's inferred commands
   override:
-    - cd dashbase-firehose-http && mvn test
+    - cd dashbase-zeppelin && mvn test
+    - cd dashbase-grafana && grunt babel
     - cd dashbase-firehose-cloudwatch && mvn test
     - cd dashbase-firehose-kafka_10 && mvn test
     - cd dashbase-firehose-nsq && mvn test
@@ -44,3 +46,12 @@ test:
     # Copy test reports to Circle test reports dir
     - mkdir -p $CIRCLE_TEST_REPORTS/junit/
     - find . -type f -regex ".*/target/test-reports/.*xml" -exec cp {} $CIRCLE_TEST_REPORTS/junit/ \;
+
+deployment:
+  master:
+    branch: master
+    commands:
+      - cd dashbase-zeppelin && mvn package
+      - cd dashbase-grafana &&
+      # Run a script that deploys to S3
+      - ./bin/deploy.sh
