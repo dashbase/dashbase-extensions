@@ -52,6 +52,6 @@ deployment:
     branch: master
     commands:
       - cd dashbase-zeppelin && mvn package
-      - cd dashbase-grafana &&
-      # Run a script that deploys to S3
+      - cd dashbase-grafana && grunt
+      # Run a script that deploys to S3 and updates builds
       - ./bin/deploy.sh

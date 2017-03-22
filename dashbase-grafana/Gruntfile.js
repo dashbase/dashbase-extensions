@@ -4,6 +4,7 @@ module.exports = function(grunt) {
 
   grunt.loadNpmTasks('grunt-execute');
   grunt.loadNpmTasks('grunt-contrib-clean');
+  grunt.loadNpmTasks('grunt-contrib-compress');
 
   grunt.initConfig({
 
@@ -66,8 +67,21 @@ module.exports = function(grunt) {
           ext:'.js'
         }]
       }
+    },
+
+    compress: {
+      main: {
+        options: {
+          mode: 'tgz',
+          archive: 'target/dashbase-grafana-datasource.tar.gz'
+        },
+        files: [
+          { src: ['dist/**']}
+        ]
+      }
     }
+
   });
 
-  grunt.registerTask('default', ['clean', 'copy:src_to_dist', 'copy:pluginDef', 'babel']);
+  grunt.registerTask('default', ['clean', 'copy:src_to_dist', 'copy:pluginDef', 'babel', 'compress']);
 };
