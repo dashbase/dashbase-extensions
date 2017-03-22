@@ -4,22 +4,23 @@ module.exports = function(grunt) {
 
   grunt.loadNpmTasks('grunt-execute');
   grunt.loadNpmTasks('grunt-contrib-clean');
+  grunt.loadNpmTasks('grunt-contrib-compress');
 
   grunt.initConfig({
 
-    clean: ["dist"],
+    clean: ["dashbase/dist"],
 
     copy: {
       src_to_dist: {
         cwd: 'src',
         expand: true,
         src: ['**/*', '!**/*.js', '!**/*.scss'],
-        dest: 'dist'
+        dest: 'dashbase/dist'
       },
       pluginDef: {
         expand: true,
         src: ['README.md'],
-        dest: 'dist'
+        dest: 'dashbase/dist'
       }
     },
 
@@ -44,7 +45,7 @@ module.exports = function(grunt) {
           cwd: 'src',
           expand: true,
           src: ['**/*.js'],
-          dest: 'dist',
+          dest: 'dashbase/dist',
           ext:'.js'
         }]
       },
@@ -53,7 +54,7 @@ module.exports = function(grunt) {
           cwd: 'src',
           expand: true,
           src: ['**/*.js'],
-          dest: 'dist/test',
+          dest: 'dashbase/dist/test',
           ext:'.js'
         }]
       },
@@ -62,12 +63,25 @@ module.exports = function(grunt) {
           expand: true,
           cwd: 'spec',
           src: ['**/*.js'],
-          dest: 'dist/test/spec',
+          dest: 'dashbase/dist/test/spec',
           ext:'.js'
         }]
       }
+    },
+
+    compress: {
+      main: {
+        options: {
+          mode: 'tgz',
+          archive: 'target/dashbase-grafana-datasource-0.0.1.tar.gz'
+        },
+        files: [
+          { src: ['dashbase/dist/**']}
+        ]
+      }
     }
+
   });
 
-  grunt.registerTask('default', ['clean', 'copy:src_to_dist', 'copy:pluginDef', 'babel']);
+  grunt.registerTask('default', ['clean', 'copy:src_to_dist', 'copy:pluginDef', 'babel', 'compress']);
 };

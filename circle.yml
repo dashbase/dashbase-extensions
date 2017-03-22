@@ -2,6 +2,10 @@ machine:
   timezone: UTC
   java:
     version: oraclejdk8
+  node:
+      version: 6.9.5
+  python:
+      version: 2.7.10
 
 experimental:
   notify:
@@ -12,12 +16,18 @@ experimental:
 dependencies:
   pre:
     - sudo apt-get update
+    - sudo apt-get install python-dev
+    - sudo pip install --upgrade awscli
+    - sudo curl -o /usr/local/bin/ecs-cli https://s3.amazonaws.com/amazon-ecs-cli/ecs-cli-linux-amd64-latest
+    - sudo chmod +x /usr/local/bin/ecs-cli
+    - ecs-cli --version
     - ulimit -c
     - ulimit -c unlimited -S
 
 # Run these bash commands instead of CircleCI's inferred commands
   override:
-    - cd dashbase-firehose-http && mvn compile
+    - cd dashbase-grafana && npm install
+    - cd dashbase-grafana && ./node_modules/grunt-cli/bin/grunt clean copy
     - cd dashbase-firehose-cloudwatch && mvn compile
     - cd dashbase-firehose-kafka_10 && mvn compile
     - cd dashbase-firehose-nsq && mvn compile
@@ -29,11 +39,12 @@ dependencies:
     - "target/streams"
     - "project/target/resolution-cache"
     - "project/target/streams"
+    - "~/.m2"
 
 test:
   # Run this bash command instead of CircleCI's inferred commands
   override:
-    - cd dashbase-firehose-http && mvn test
+    - cd dashbase-grafana && ./node_modules/grunt-cli/bin/grunt babel
     - cd dashbase-firehose-cloudwatch && mvn test
     - cd dashbase-firehose-kafka_10 && mvn test
     - cd dashbase-firehose-nsq && mvn test
@@ -44,3 +55,11 @@ test:
     # Copy test reports to Circle test reports dir
     - mkdir -p $CIRCLE_TEST_REPORTS/junit/
     - find . -type f -regex ".*/target/test-reports/.*xml" -exec cp {} $CIRCLE_TEST_REPORTS/junit/ \;
+
+deployment:
+  master:
+    branch: master
+    commands:
+      - cd dashbase-grafana && ./node_modules/grunt-cli/bin/grunt compress
+      # Run a script that deploys to S3 and updates builds
+      - ./bin/deploy.sh
