@@ -1,4 +1,10 @@
 {
+  "id": null,
+  "title": "Dashbase App Dashboard",
+  "originalTitle": "Dashbase Main Dashboard",
+  "tags": [
+    "dashbase-app", "imported"
+  ],
   "annotations": {
     "list": []
   },
@@ -6,7 +12,6 @@
   "gnetId": null,
   "graphTooltip": 0,
   "hideControls": false,
-  "id": null,
   "links": [],
   "refresh": "5s",
   "rows": [
@@ -17,7 +22,7 @@
         {
           "aliasColors": {},
           "bars": true,
-          "datasource": "${DS_DASHBASE}",
+          "datasource": null,
           "fill": 1,
           "id": 1,
           "legend": {
@@ -151,7 +156,6 @@
   ],
   "schemaVersion": 14,
   "style": "dark",
-  "tags": [],
   "templating": {
     "list": [
       {
@@ -222,6 +226,5 @@
     ]
   },
   "timezone": "browser",
-  "title": "Main Dashboard",
   "version": 6
 }
