@@ -17,7 +17,7 @@
         {
           "aliasColors": {},
           "bars": true,
-          "datasource": "${DS_STAGING}",
+          "datasource": "${DS_DASHBASE}",
           "fill": 1,
           "id": 1,
           "legend": {

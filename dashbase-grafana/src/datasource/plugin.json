@@ -1,10 +1,10 @@
 {
   "type": "datasource",
   "name": "Dashbase",
-  "id": "dashbase",
+  "id": "dashbase-datasource",
 
   "partials": {
-    "config": "public/plugins/dashbase-grafana-app/partials/config.html"
+    "config": "public/plugins/dashbase-grafana-app/datasource/partials/config.html"
   },
 
   "info": {
@@ -15,8 +15,8 @@
     },
     "keywords": ["dashbase datasource"],
     "logos": {
-      "small": "../img/_dashbase73x73.png",
-      "large": "../img/_dashbase400x400.png"
+      "small": "../dashbase-app/img/_dashbase73x73.png",
+      "large": "../dashbase-app/img/_dashbase400x400.png"
     },
     "links": [
       {"name": "dashbase.io", "url": "http://www.dashbase.io"}

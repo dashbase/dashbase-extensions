@@ -1,14 +1,14 @@
 {
   "type": "app",
   "name": "Dashbase",
-  "id": "dashbase-grafana-app",
+  "id": "dashbase-app",
   "pages": [],
   "css": {
     "dark": "css/dark.css",
     "light": "css/light.css"
   },
   "info": {
-    "description": "Dashbase app for Grafana",
+    "description": "Dashbase App for Grafana",
     "author": {
       "name": "Dashbase",
       "url": "http://www.dashbase.io"
@@ -29,12 +29,12 @@
   "includes": [
     {
       "type": "dashboard",
-      "name": "Dashbase Dashboard",
+      "name": "Dashbase Main",
       "path": "dashboards/main_dashboard.json"
     },
     {
       "type": "datasource",
-      "name": "Dashbase Datasource"
+      "name": "Dashbase"
     }
   ],
   "dependencies": {
