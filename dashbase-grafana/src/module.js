@@ -1,11 +1,5 @@
-import {DashbaseDatasource} from './datasource';
-import {DashbaseDatasourceQueryCtrl} from './query_ctrl';
-
-class DashbaseConfigCtrl {}
-DashbaseConfigCtrl.templateUrl = 'partials/config.html';
+import {DashbaseAppConfigCtrl} from './components/config';
 
 export {
-  DashbaseDatasource as Datasource,
-  DashbaseDatasourceQueryCtrl as QueryCtrl,
-  DashbaseConfigCtrl as ConfigCtrl
+  DashbaseAppConfigCtrl as ConfigCtrl,
 };

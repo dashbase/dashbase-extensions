@@ -1,0 +1,30 @@
+{
+  "type": "datasource",
+  "name": "Dashbase",
+  "id": "dashbase",
+
+  "partials": {
+    "config": "public/plugins/dashbase-grafana-app/partials/config.html"
+  },
+
+  "info": {
+    "description": "Dashbase Datasource for Grafana",
+    "author": {
+      "name": "Dashbase Inc.",
+      "url": "http://www.dashbase.io"
+    },
+    "keywords": ["dashbase datasource"],
+    "logos": {
+      "small": "../img/_dashbase73x73.png",
+      "large": "../img/_dashbase400x400.png"
+    },
+    "links": [
+      {"name": "dashbase.io", "url": "http://www.dashbase.io"}
+    ],
+    "version": "0.0.1",
+    "updated": "2017-03-22"
+  },
+
+  "annotations": false,
+  "metrics": true
+}
