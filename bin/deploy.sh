@@ -12,7 +12,7 @@ configure_aws_cli() {
 
 upload_to_s3() {
   # Upload Grafana tarball
-  aws s3 cp dashbase-grafana/target/dashbase-grafana-datasource-$VERSION.tar.gz s3://dashbase-builds/master/dashbase-grafana-datasource-$VERSION.tar.gz
+  aws s3 cp dashbase-grafana/target/dashbase-grafana-app-$VERSION.tar.gz s3://dashbase-builds/master/dashbase-grafana-app-$VERSION.tar.gz
 
   # Update Grafana server
   ssh ec2-user@staging.dashbase.io "./update_grafana.sh"

@@ -1,19 +1,21 @@
 {
-  "type": "datasource",
+  "type": "app",
   "name": "Dashbase",
-  "id": "dashbase",
-
-  "partials": {
-    "config": "public/app/plugins/datasource/dashbase/partials/config.html"
+  "id": "dashbase-app",
+  "pages": [],
+  "css": {
+    "dark": "css/dark.css",
+    "light": "css/light.css"
   },
-
   "info": {
-    "description": "Dashbase Data Source for Grafana",
+    "description": "Dashbase App for Grafana",
     "author": {
-      "name": "Dashbase Inc.",
+      "name": "Dashbase",
       "url": "http://www.dashbase.io"
     },
-    "keywords": ["dashbase"],
+    "keywords": [
+      "dashbase app"
+    ],
     "logos": {
       "small": "img/_dashbase73x73.png",
       "large": "img/_dashbase400x400.png"
@@ -22,9 +24,21 @@
       {"name": "dashbase.io", "url": "http://www.dashbase.io"}
     ],
     "version": "0.0.1",
-    "updated": "2017-03-22"
+    "updated": "2017-03-23"
   },
-
-  "annotations": false,
-  "metrics": true
+  "includes": [
+    {
+      "type": "dashboard",
+      "name": "Dashbase Main",
+      "path": "dashboards/main_dashboard.json"
+    },
+    {
+      "type": "datasource",
+      "name": "Dashbase"
+    }
+  ],
+  "dependencies": {
+    "grafanaVersion": "4.x.x",
+    "plugins": []
+  }
 }

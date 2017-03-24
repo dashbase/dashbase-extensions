@@ -27,4 +27,4 @@ export class DashbaseDatasourceQueryCtrl extends QueryCtrl {
   }
 }
 
-DashbaseDatasourceQueryCtrl.templateUrl = 'partials/query.editor.html';
+DashbaseDatasourceQueryCtrl.templateUrl = 'datasource/partials/query.editor.html';
