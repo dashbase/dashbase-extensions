@@ -61,5 +61,7 @@ deployment:
     branch: master
     commands:
       - cd dashbase-grafana && ./node_modules/grunt-cli/bin/grunt compress
-      # Run a script that deploys to S3 and updates builds
-      - ./bin/deploy.sh
+      # Run a script that deploys to S3
+      - ./deploy/update_s3.sh
+      # Update Grafana server on staging
+      - ssh ec2-user@${STAGING_ADDR} "bash -s" < ./deploy/update_grafana.sh
