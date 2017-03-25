@@ -4,11 +4,23 @@
     "name": "dashbase",
     "className": "io.dashbase.zeppelin.DashbaseInterpreter",
     "properties": {
-      "dashbase.url": {
-        "envName": "DASHBASE_URL",
-        "propertyName": "dashbase.url",
-        "defaultValue": "localhost:7888",
-        "description": "Dashbase url. Default = localhost:7888"
+      "dashbase.host": {
+        "envName": "DASHBASE_HOST",
+        "propertyName": "dashbase.host",
+        "defaultValue": "localhost",
+        "description": "Dashbase host. Default = localhost"
+      },
+      "dashbase.host": {
+        "envName": "DASHBASE_PORT",
+        "propertyName": "dashbase.port",
+        "defaultValue": "9876",
+        "description": "Dashbase port. Default = 9876"
+      },
+      "use.https": {
+        "envName": "USE_HTTPS",
+        "propertyName": "use.https",
+        "defaultValue": "false",
+        "description": "Use HTTPS. Default = false"
       },
       "dashbase.connection.timeout": {
         "envName": "DASHBASE_CONNECTION_TIMEOUT",

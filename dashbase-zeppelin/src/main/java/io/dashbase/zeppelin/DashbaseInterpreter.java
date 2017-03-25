@@ -1,5 +1,6 @@
 package io.dashbase.zeppelin;
 
+import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -42,14 +43,18 @@ public class DashbaseInterpreter extends Interpreter {
       + "  - sql <sql_statement>\n"
       + "    . performs SQL query";
   
-  private String dashbaseUrl = null;
+  private String dashbaseHost = null;
+  private int dashbasePort = 9876;
+  private boolean useHttps = false;
   
   protected static final List<String> COMMANDS = Arrays.asList(
       "tables", "info", "sql", "help", "search");
   
   static final String CLIENT_NAME = "dashbase_zeppelin";
   
-  public static final String DASHBASE_URL = "dashbase.url";
+  public static final String DASHBASE_HOST = "dashbase.host";
+  public static final String DASHBASE_PORT = "dashbase.port";
+  public static final String USE_HTTPS = "use.https";
   public static final String DASHBASE_CONNECTION_TIMEOUT = "dashbase.connection.timeout";
   public static final String DASHBASE_SOCKET_TIMEOUT = "dashbase.socket.timeout";
   
@@ -134,9 +139,9 @@ public class DashbaseInterpreter extends Interpreter {
 
     //int currentResultSize = resultSize;
 
-    if (dashbaseUrl == null) {
+    if (svc == null) {
       return new InterpreterResult(InterpreterResult.Code.ERROR,
-        "Dashbase url is not configured.");
+        "Dashbase server is not configured.");
     }
 
     String[] items = StringUtils.split(cmd.trim(), " ", 3);
@@ -189,7 +194,19 @@ public class DashbaseInterpreter extends Interpreter {
 	@Override
 	public void open() {
 	  logger.info("starting dashbase interpreter");	  
-	  dashbaseUrl = getProperty(DASHBASE_URL);
+	  dashbaseHost = getProperty(DASHBASE_HOST);
+	  
+	  try {
+	    dashbasePort = Integer.parseInt(getProperty(DASHBASE_PORT));
+	  } catch(Exception e) {
+	    logger.error("invalid port: " + e);
+	  }
+	  
+	  try {
+	    useHttps = Boolean.parseBoolean(USE_HTTPS);
+	  } catch(Exception e) {
+	    logger.error("bad configuration for https");
+	  }
 	  
 	  long connectionTimeout;
 	  try {
@@ -198,14 +215,17 @@ public class DashbaseInterpreter extends Interpreter {
 	    connectionTimeout = DEFAULT_CONNECTION_TIMEOUT;
 	  }
 	  
-	  long socketTimeout;
-      try {
-        socketTimeout = Long.parseLong(getProperty(DASHBASE_SOCKET_TIMEOUT));
-      } catch(Exception e) {
-        socketTimeout = DEFAULT_SOCKET_TIMEOUT;
-      }
-      
-      svc = new HttpClientService(dashbaseUrl);
-	  logger.info("dashbase interpreter started");
+    long socketTimeout;
+    try {
+      socketTimeout = Long.parseLong(getProperty(DASHBASE_SOCKET_TIMEOUT));
+    } catch(Exception e) {
+      socketTimeout = DEFAULT_SOCKET_TIMEOUT;
+    }
+    if (dashbaseHost != null) {
+      svc = new HttpClientService(new InetSocketAddress(dashbaseHost, dashbasePort), useHttps);
+	    logger.info("dashbase interpreter started");
+    } else {
+      logger.error("dashbase interpreter not started due to null host");
+    }
 	}	
 }
