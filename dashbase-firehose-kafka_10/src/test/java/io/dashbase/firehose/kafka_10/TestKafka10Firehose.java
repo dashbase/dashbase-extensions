@@ -33,19 +33,13 @@ public class TestKafka10Firehose {
       this.config = new KafkaFirehoseConfig();
       this.config.pollIntervalMs = 100;
       this.config.topic = topic;
+      this.config.partitions = ImmutableSet.of(partition);
       setConsumer(mockConsumer);
     }
-
-    @Override
-    public void start() {
-      mockConsumer.assign(ImmutableSet.of(new TopicPartition(config.topic, partition)));
-    }
-
   };
 
   @Test
-  public void testBasic() throws Exception {
-
+  public void testBasic() throws Exception {    
     firehose.configure(null);
 
     firehose.start();
@@ -138,6 +132,4 @@ public class TestKafka10Firehose {
       Assert.assertEquals(2L, entry.getValue().longValue());
     }
   }
-
-
 }

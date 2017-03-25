@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.stream.Collectors;
 import java.util.Properties;
 
 import org.apache.kafka.clients.consumer.Consumer;
@@ -38,6 +39,8 @@ public class Kafka10Firehose extends RapidFirehose {
   static final int DEFAULT_POLL_INTERVAL_MS = 100;
 
   private KafkaOffset offset = new KafkaOffset();
+  
+  
 
   private final ObjectMapper mapper = new ObjectMapper();
 
@@ -63,7 +66,6 @@ public class Kafka10Firehose extends RapidFirehose {
     props.putAll(config.kafkaProps);
     props.put("bootstrap.servers", config.hosts);
     props.put("group.id", config.groupId);
-    props.put("enable.auto.commit", config.enableAutoCommit);
     props.put("key.deserializer", ByteArrayDeserializer.class.getName());
     props.put("value.deserializer", ByteArrayDeserializer.class.getName());
     props.put("enable.auto.commit", "false");
@@ -72,7 +74,12 @@ public class Kafka10Firehose extends RapidFirehose {
   }
 
   public void start() throws Exception {
-    this.consumer.subscribe(ImmutableSet.of(config.topic));
+    if (this.config.partitions == null || this.config.partitions.isEmpty()) {      
+      this.consumer.subscribe(ImmutableSet.of(config.topic));
+    } else {
+      this.consumer.assign(config.partitions.stream().map(
+          e -> new TopicPartition(config.topic, e.intValue())).collect(Collectors.toList()));
+    }
   }
 
   public void shutdown() throws Exception {
