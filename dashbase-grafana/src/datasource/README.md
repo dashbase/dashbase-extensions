@@ -1,8 +1,7 @@
 # Dashbase Datasource Plugin
 
 ## Dependencies
-- [NodeJS][1]
-[1]: https://nodejs.org/download/ 
+- [NodeJS](https://nodejs.org/download) 
 
 ## How To
 Download to desired path and set custom plugin path in Grafana configuration.
