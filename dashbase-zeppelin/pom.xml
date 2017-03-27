@@ -56,6 +56,14 @@
                 </executions>
             </plugin>
         </plugins>
+	    <extensions>
+	    <!-- Enabling the use of FTP -->
+	           <extension>
+	              <groupId>org.apache.maven.wagon</groupId>
+	              <artifactId>wagon-ftp</artifactId>
+	              <version>2.10</version>
+	           </extension>
+	    </extensions>
 		<resources>
 		    <resource>
 		        <directory>src/main/resources</directory>
@@ -88,4 +96,10 @@
 	           <url>http://maven.dashbase.io</url>
 	    </repository>
 	</repositories>
+    <distributionManagement>
+        <repository>
+          <id>dashbase-ftp</id>
+          <url>ftp://enterprise.dashbase.io/var/www/html/maven2</url>
+        </repository>
+    </distributionManagement>
 </project>
