@@ -10,7 +10,7 @@
         "defaultValue": "localhost",
         "description": "Dashbase host. Default = localhost"
       },
-      "dashbase.host": {
+      "dashbase.port": {
         "envName": "DASHBASE_PORT",
         "propertyName": "dashbase.port",
         "defaultValue": "9876",
