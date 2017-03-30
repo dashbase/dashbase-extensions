@@ -33,6 +33,11 @@
       "path": "dashboards/main_dashboard.json"
     },
     {
+      "type": "dashboard",
+      "name": "Metrics Monitor",
+      "path": "dashboards/monitor_dashboard.json"
+    },
+    {
       "type": "datasource",
       "name": "Dashbase"
     }
