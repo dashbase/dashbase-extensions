@@ -6,8 +6,8 @@ export class RapidResponseParser {
 	}
 
 	parseResponse(sentTargets) {
-		var target;
-		var dataArr = [];
+    let target;
+    let dataArr = [];
 		if (this.response.data.error) {
 			this.response.data = this.response.data.error; // report server error
 			throw this.response;
@@ -15,19 +15,27 @@ export class RapidResponseParser {
 
 		if (sentTargets[0].type == "timeseries") { // graph format
 			target = this.response.data.aggregations[sentTargets[0].alias]; // change to i for when implementing support for multi queries per graph
-			if (!target) { 
+			if (!target) {
 				this.response.data = []; // no aggregation response, likely due to no data within timerange
 				return this.response;
 			}
 
+      // NUMERIC RESPONSE
+      if (target.responseType == "numeric") {
+        dataArr.push({
+          "target": sentTargets[0].alias,
+          "datapoints": [[target.value,""]]
+        });
+      }
+
 			// HISTOGRAM RESPONSE
-			if (target.histogramBuckets) {
-        var buckets = target.histogramBuckets;
+			if (target.responseType == "ts" && target.histogramBuckets) {
+        let buckets = target.histogramBuckets;
 				dataArr.push({
 					"target": sentTargets[0].alias,
 					"datapoints": _.map(buckets, bucket => {
 						return [bucket.count, bucket.timeInSec * 1000];
-					}) 
+					})
 				});
 			}
 
@@ -35,7 +43,7 @@ export class RapidResponseParser {
 		} else { // table format
 
 			// check if no hits or aggregations exist in response
-			if ((this.response.data.numHits == 0 && this.response.data.hits.length == 0) 
+			if ((this.response.data.numHits == 0 && this.response.data.hits.length == 0)
 				&& _.isEmpty(this.response.data.aggregations)) {
 				this.response.data = [];
 				return this.response;
@@ -62,9 +70,9 @@ export class RapidResponseParser {
 			}
 
 			// HITS RESPONSE
-			var hits = this.response.data.hits;
-			var fields = Object.keys(hits[0].payload.fields); // take the first hit and extract fields
-			var columns = [
+			let hits = this.response.data.hits;
+      let fields = Object.keys(hits[0].payload.fields); // take the first hit and extract fields
+      let columns = [
 			{
 				"text": "DATE",
 				"type": "date",
@@ -80,11 +88,11 @@ export class RapidResponseParser {
 				"sort": false
 			});
 
-			dataArr = [{ 
+			dataArr = [{
 				"columns": columns,
 				"rows": _.map(hits, hit => {
-					var row = [hit.timeInSeconds * 1000];
-					for (var i = 0; i < fields.length; i++) {
+          let row = [hit.timeInSeconds * 1000];
+					for (let i = 0; i < fields.length; i++) {
 						row.push(hit.payload.fields[fields[i]]);
 					}
 					row.push(hit.payload.stored);
