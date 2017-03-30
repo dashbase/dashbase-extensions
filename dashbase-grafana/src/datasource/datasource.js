@@ -30,7 +30,7 @@ export class DashbaseDatasource {
       } // otherwise use user provided alias
 
       sentTargets.push(target);
-      payload = this._buildQueryString(target, options.range);
+      payload = encodeURI(this._buildQueryString(target, options.range));
     }
     if (sentTargets.length === 0) {
       return $q.when([]);
@@ -64,21 +64,32 @@ export class DashbaseDatasource {
   _buildQueryString(target, timerange) {
     let templateTarget = this.templateSrv.replace(target.target);
     if (templateTarget == "*") templateTarget = "\\*";
-    let queryStr = `SELECT%20${templateTarget}`;
+    let queryStr = `SELECT ${templateTarget}`;
+
+    // alias
     if (target.target && this._isAggregation(templateTarget)) {
-      queryStr += `%20AS%20"${target.alias}"`;
+      queryStr += ` AS "${target.alias}"`;
     } else {
       target.alias = ""; // remove alias as it is not used
     }
-    let timeRangeFilter = ` BEFORE%20${timerange.to.unix()}%20AFTER%20${timerange.from.unix()}`; // time in seconds
 
-    if (target.query) { // if WHERE query exists
-      queryStr += `%20WHERE%20${this.templateSrv.replace(target.query)}`;
+    // from clause
+    if (target.from) {
+      queryStr += ` FROM ${this.templateSrv.replace(target.from)}`;
     }
+
+    // where clause
+    if (target.query) { // if WHERE query exists
+      queryStr += ` WHERE ${this.templateSrv.replace(target.query)}`;
+    }
+
+    // time (before x after y)
+    let timeRangeFilter = ` BEFORE ${timerange.to.unix()} AFTER ${timerange.from.unix()}`; // time in seconds
     queryStr += timeRangeFilter;
 
+    // limit of
     if (target.limit) {
-      queryStr += `%20LIMIT%20${this.templateSrv.replace(target.limit)}`;
+      queryStr += ` LIMIT ${this.templateSrv.replace(target.limit)}`;
     }
     return queryStr;
   }
