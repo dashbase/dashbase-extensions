@@ -63,4 +63,10 @@ deployment:
       - cd dashbase-grafana && ./node_modules/grunt-cli/bin/grunt compress
       - aws s3 cp dashbase-grafana/target/dashbase-grafana-app-0.0.1.tar.gz s3://dashbase-builds/master/
       # Update Grafana server on staging
+      - ssh ec2-user@${DEMO_ADDR} "sudo aws s3 cp s3://dashbase-builds/master/dashbase-grafana-app-$VERSION.tar.gz /var/lib/grafana/plugins/dashbase-grafana.tar.gz"
       - ssh ec2-user@${DEMO_ADDR} "bash -s" < ./deploy/update_grafana.sh
+  eero:
+    branch: eero-deploy
+    commands:
+      - cd dashbase-grafana && ./node_modules/grunt-cli/bin/grunt compress
+      - scp dashbase-grafana/target/dashbase-grafana-app-0.0.1.tar.gz ec2-user@${EERO_ADDR}:/home/ec2-user/dashbase-grafana.tar.gz
