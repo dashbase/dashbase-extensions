@@ -70,3 +70,4 @@ deployment:
     commands:
       - cd dashbase-grafana && ./node_modules/grunt-cli/bin/grunt compress
       - scp dashbase-grafana/target/dashbase-grafana-app-0.0.1.tar.gz ec2-user@${EERO_ADDR}:/home/ec2-user/dashbase-grafana.tar.gz
+      - ssh ec2-user@${EERO_ADDR} "bash -s" < ./deploy/update_grafana.sh
