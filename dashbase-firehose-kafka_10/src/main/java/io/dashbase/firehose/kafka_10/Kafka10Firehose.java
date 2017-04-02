@@ -122,5 +122,10 @@ public class Kafka10Firehose extends RapidFirehose {
       metricRegistry.register(key, (Gauge<Double>) () -> entry.getValue().value());
     }
   }
+  
+  @Override
+  public String getName() {
+    return "kafka_10";
+  }
 
 }

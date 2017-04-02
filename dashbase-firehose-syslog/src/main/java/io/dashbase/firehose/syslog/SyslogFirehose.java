@@ -43,6 +43,11 @@ public class SyslogFirehose extends RapidFirehose {
   
 	public SyslogFirehose() {
 	}
+	
+	@Override
+  public String getName() {
+    return "syslog";
+  }
 
 	@Override
 	public void registerMetrics(MetricRegistry metricRegistry) {

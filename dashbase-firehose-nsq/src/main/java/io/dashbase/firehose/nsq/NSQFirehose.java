@@ -123,4 +123,9 @@ public class NSQFirehose extends RapidFirehose {
 		metricRegistry.register("firehose.nsq.queue.size", (Gauge<Integer>) () -> blockingQueue.size());		
 	    eventProduceMeter = metricRegistry.meter("firehose.jsq.produce");
 	}
+	
+	@Override
+	  public String getName() {
+		return "nsq";
+	  }
 }
