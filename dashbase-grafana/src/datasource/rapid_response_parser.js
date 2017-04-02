@@ -40,7 +40,6 @@ export class RapidResponseParser {
 
       // NESTED TS AGGREGATION RESPONSE
       if (target.responseType == "tsa" && target.buckets) {
-        console.log("TSA");
         let buckets = target.buckets;
         dataArr.push({
           "target": sentTargets[0].alias,
