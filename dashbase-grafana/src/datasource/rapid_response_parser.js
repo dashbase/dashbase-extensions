@@ -14,12 +14,11 @@ export class RapidResponseParser {
     }
 
     if (sentTargets[0].type == "timeseries") { // graph format
-      target = this.response.data.aggregations[sentTargets[0].alias]; // change to i for when implementing support for multi queries per graph
+      target = this.response.data.aggregations[Object.keys(this.response.data.aggregations)[0]];
       if (!target) {
         this.response.data = []; // no aggregation response, likely due to no data within timerange
         return this.response;
       }
-
       // NUMERIC RESPONSE
       if (target.responseType == "numeric") {
         dataArr.push({
@@ -28,13 +27,29 @@ export class RapidResponseParser {
         });
       }
 
-      // HISTOGRAM RESPONSE
+      // TS RESPONSE
       if (target.responseType == "ts" && target.histogramBuckets) {
         let buckets = target.histogramBuckets;
         dataArr.push({
           "target": sentTargets[0].alias,
           "datapoints": _.map(buckets, bucket => {
             return [bucket.count, bucket.timeInSec * 1000];
+          })
+        });
+      }
+
+      // NESTED TS AGGREGATION RESPONSE
+      if (target.responseType == "tsa" && target.buckets) {
+        let buckets = target.buckets;
+        dataArr.push({
+          "target": sentTargets[0].alias,
+          "datapoints": _.map(buckets, bucket => {
+            let value = bucket.count;
+            if (bucket.hasOwnProperty("response")) {
+              // parse response types
+              value = bucket.response.value;
+            }
+            return [value, bucket.timeInSec * 1000];
           })
         });
       }

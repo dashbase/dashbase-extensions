@@ -35,7 +35,7 @@ export class DashbaseDatasource {
     if (sentTargets.length === 0) {
       return $q.when([]);
     }
-    return this._get("v1/sql", payload).then(function (response) {
+    return this._get("v1/sql", payload).then(response => {
       return new RapidResponseParser(response).parseResponse(sentTargets);
     });
   }
@@ -97,7 +97,7 @@ export class DashbaseDatasource {
   _isAggregation(str) {
     let aggregations = [
       "sum(", "min(", "max(", "avg(", "facet(", "histo(",
-      "ts(", "cohort("
+      "ts(", "tsa(" , "cohort("
     ];
     for (let i = 0; i < aggregations.length; i++) {
       if (_.includes(str, aggregations[i])) {
