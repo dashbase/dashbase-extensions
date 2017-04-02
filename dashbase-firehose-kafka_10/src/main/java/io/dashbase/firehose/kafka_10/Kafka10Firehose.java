@@ -127,9 +127,4 @@ public class Kafka10Firehose extends RapidFirehose {
   public String getName() {
     return "kafka_10";
   }
-
-  @Override
-  public String getName() {
-    return "kafka10";
-  }
 }
