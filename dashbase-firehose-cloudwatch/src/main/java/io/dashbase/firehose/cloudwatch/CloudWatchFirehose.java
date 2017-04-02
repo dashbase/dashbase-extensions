@@ -3,6 +3,11 @@ package io.dashbase.firehose.cloudwatch;
 import java.util.Iterator;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.amazonaws.services.logs.AWSLogs;
+import com.amazonaws.services.logs.AWSLogsClientBuilder;
 import com.amazonaws.services.logs.model.GetLogEventsRequest;
 import com.amazonaws.services.logs.model.GetLogEventsResult;
 import com.amazonaws.services.logs.model.OutputLogEvent;
@@ -12,12 +17,8 @@ import com.codahale.metrics.MetricRegistry;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Preconditions;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import rapid.firehose.RapidFirehose;
-
-import com.amazonaws.services.logs.*;
 
 public class CloudWatchFirehose extends RapidFirehose {
   private static Logger logger = LoggerFactory.getLogger(CloudWatchFirehose.class);
@@ -96,6 +97,11 @@ public class CloudWatchFirehose extends RapidFirehose {
     logger.info("stopping cloudwatch client");
     cloudWatchClient.shutdown();
     logger.info("cloudwatch client stopped");
+  }
+
+  @Override
+  public String getName() {
+	return "cloudwatch";
   }
 
 }
