@@ -1,10 +1,6 @@
 {
-  "id": null,
   "title": "Dashbase App Dashboard",
   "originalTitle": "Dashbase Main Dashboard",
-  "tags": [
-    "dashbase-app", "imported"
-  ],
   "annotations": {
     "list": []
   },
@@ -12,6 +8,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "hideControls": false,
+  "id": null,
   "links": [],
   "refresh": "5s",
   "rows": [
@@ -108,7 +105,7 @@
           "fontSize": "100%",
           "id": 2,
           "links": [],
-          "pageSize": null,
+          "pageSize": 10,
           "scroll": true,
           "showHeader": true,
           "sort": {
@@ -130,11 +127,40 @@
               "thresholds": [],
               "type": "date",
               "unit": "short"
+            },
+            {
+              "colorMode": null,
+              "colors": [
+                "rgba(245, 54, 54, 0.9)",
+                "rgba(237, 129, 40, 0.89)",
+                "rgba(50, 172, 45, 0.97)"
+              ],
+              "dateFormat": "YYYY-MM-DD HH:mm:ss",
+              "decimals": 2,
+              "pattern": "/^(?!RAW).*$/",
+              "thresholds": [],
+              "type": "hidden",
+              "unit": "short"
+            },
+            {
+              "colorMode": null,
+              "colors": [
+                "rgba(245, 54, 54, 0.9)",
+                "rgba(237, 129, 40, 0.89)",
+                "rgba(50, 172, 45, 0.97)"
+              ],
+              "dateFormat": "YYYY-MM-DD HH:mm:ss",
+              "decimals": 2,
+              "pattern": "RAW",
+              "thresholds": [],
+              "type": "string",
+              "unit": "short"
             }
           ],
           "targets": [
             {
               "alias": "",
+              "limit": "100",
               "query": "",
               "refId": "A",
               "target": "*",
@@ -156,6 +182,10 @@
   ],
   "schemaVersion": 14,
   "style": "dark",
+  "tags": [
+    "dashbase-app",
+    "imported"
+  ],
   "templating": {
     "list": [
       {
@@ -226,5 +256,5 @@
     ]
   },
   "timezone": "browser",
-  "version": 6
+  "version": 1
 }

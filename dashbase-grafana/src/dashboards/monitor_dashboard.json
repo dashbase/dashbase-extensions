@@ -1,10 +1,6 @@
 {
   "title": "Dashbase Instance Monitor",
   "originalTitle": "Dashbase Instance Monitor",
-  "tags": [
-    "dashbase-app",
-    "imported"
-  ],
   "annotations": {
     "list": []
   },
@@ -79,14 +75,14 @@
               "alias": "avg('metric_data.number_value')",
               "from": "_system",
               "limit": "0",
-              "query": "metric_name='jvm.cpu.usage.percent' AND 'meta.type'='$table'",
+              "query": "metric_name='jvm.cpu.usage.percent' AND 'meta.type'='$table' AND partition=$partition",
               "refId": "A",
               "target": "avg('metric_data.number_value')",
               "type": "timeseries"
             }
           ],
           "thresholds": "75,100",
-          "title": "CPU Usage ($table)",
+          "title": "CPU Usage ($table-p$partition)",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -130,7 +126,7 @@
               "alias": "cpu_ts",
               "from": "_system",
               "limit": "0",
-              "query": "metric_name='jvm.cpu.usage.percent' AND 'meta.type'='$table'",
+              "query": "metric_name='jvm.cpu.usage.percent' AND 'meta.type'='$table' AND partition=$partition",
               "refId": "A",
               "target": "ts($granularity,avg('metric_data.number_value'))",
               "type": "timeseries"
@@ -139,7 +135,7 @@
           "thresholds": [],
           "timeFrom": null,
           "timeShift": null,
-          "title": "CPU over time ($table) per $granularity",
+          "title": "CPU over time ($table-p$partition) per $granularity",
           "tooltip": {
             "shared": true,
             "sort": 0,
@@ -215,7 +211,7 @@
               "alias": "used offheap",
               "from": "_system",
               "limit": "0",
-              "query": "metric_name='jvm.memory.non-heap.used' AND 'meta.type'='$table'",
+              "query": "metric_name='jvm.memory.non-heap.used' AND 'meta.type'='$table' AND partition=$partition",
               "refId": "A",
               "target": "ts($granularity,avg('metric_data.number_value'))",
               "type": "timeseries"
@@ -224,7 +220,7 @@
           "thresholds": [],
           "timeFrom": null,
           "timeShift": null,
-          "title": "Off-heap Usage",
+          "title": "Off-heap Usage ($table-p$partition)",
           "tooltip": {
             "shared": true,
             "sort": 0,
@@ -288,7 +284,7 @@
               "alias": "used heap",
               "from": "_system",
               "limit": "0",
-              "query": "metric_name='jvm.memory.heap.used' AND 'meta.type'='$table'",
+              "query": "metric_name='jvm.memory.heap.used' AND 'meta.type'='$table' AND partition=$partition",
               "refId": "A",
               "target": "ts($granularity,avg('metric_data.number_value'))",
               "type": "timeseries"
@@ -297,7 +293,7 @@
           "thresholds": [],
           "timeFrom": null,
           "timeShift": null,
-          "title": "Heap Usage",
+          "title": "Heap Usage ($table-p$partition)",
           "tooltip": {
             "shared": true,
             "sort": 0,
@@ -351,11 +347,12 @@
             "rgba(50, 172, 45, 0.97)"
           ],
           "datasource": null,
-          "format": "decbytes",
+          "decimals": 2,
+          "format": "percent",
           "gauge": {
             "maxValue": 100,
             "minValue": 0,
-            "show": false,
+            "show": true,
             "thresholdLabels": false,
             "thresholdMarkers": true
           },
@@ -398,14 +395,15 @@
             {
               "alias": "avg('metric_data.number_value')",
               "from": "_system",
-              "query": "metric_name='dashbase.disk.available.bytes'",
+              "limit": "0",
+              "query": "metric_name='dashbase.disk.available.bytes.percent'",
               "refId": "A",
               "target": "avg('metric_data.number_value')",
               "type": "timeseries"
             }
           ],
-          "thresholds": "",
-          "title": "Available Hard Disk",
+          "thresholds": "15",
+          "title": "Disk Percent Available",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -481,7 +479,7 @@
             }
           ],
           "thresholds": "",
-          "title": "Total Hard Disk Size",
+          "title": "Total Disk Size",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -594,7 +592,7 @@
           "bars": false,
           "datasource": null,
           "fill": 1,
-          "id": 16,
+          "id": 11,
           "legend": {
             "avg": false,
             "current": false,
@@ -613,24 +611,24 @@
           "points": false,
           "renderer": "flot",
           "seriesOverrides": [],
-          "span": 6,
+          "span": 4,
           "stack": false,
           "steppedLine": false,
           "targets": [
             {
-              "alias": "One Minute Rate",
+              "alias": "One Minute Average",
               "from": "_system",
-              "limit": "0",
-              "query": "metric_name='dashbase.firehose.metrics.consumed.bytes'",
+              "limit": "",
+              "query": "metric_name='dashbase.ingestion.event.bytes' AND 'meta.type'='$table' AND partition=$partition",
               "refId": "A",
-              "target": "ts($granularity,avg('metric_data.oneMinuteRate'))",
+              "target": "ts(minute,avg('metric_data.oneMinuteRate'))",
               "type": "timeseries"
             }
           ],
           "thresholds": [],
           "timeFrom": null,
           "timeShift": null,
-          "title": "Firehose Consumption Rate (per second)",
+          "title": "Ingestion Bytes Per Second ($table-p$partition)",
           "tooltip": {
             "shared": true,
             "sort": 0,
@@ -667,7 +665,396 @@
           "bars": false,
           "datasource": null,
           "fill": 1,
-          "id": 11,
+          "id": 16,
+          "legend": {
+            "avg": false,
+            "current": false,
+            "max": false,
+            "min": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "links": [],
+          "nullPointMode": "null",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [],
+          "span": 4,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "alias": "One Minute Rate",
+              "from": "_system",
+              "limit": "0",
+              "query": "metric_name='dashbase.ingestion.events' AND 'meta.type'='$table' AND partition=$partition",
+              "refId": "A",
+              "target": "ts($granularity,avg('metric_data.oneMinuteRate'))",
+              "type": "timeseries"
+            }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeShift": null,
+          "title": "Ingestion Count Per Second Rate ($table-p$partition)",
+          "tooltip": {
+            "shared": true,
+            "sort": 0,
+            "value_type": "individual"
+          },
+          "type": "graph",
+          "xaxis": {
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            },
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            }
+          ]
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "datasource": null,
+          "fill": 1,
+          "id": 28,
+          "legend": {
+            "avg": false,
+            "current": false,
+            "max": false,
+            "min": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "links": [],
+          "nullPointMode": "null",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [],
+          "span": 4,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "alias": "1 minute rate",
+              "from": "_system",
+              "limit": "0",
+              "query": "metric_name='dashbase.index.timeslice.count' AND 'meta.type'='$table' AND partition=$partition",
+              "refId": "A",
+              "target": "ts($granularity,avg('metric_data.number_value'))",
+              "type": "timeseries"
+            }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeShift": null,
+          "title": "Time Slice Count ($table-p$partition)",
+          "tooltip": {
+            "shared": true,
+            "sort": 0,
+            "value_type": "individual"
+          },
+          "type": "graph",
+          "xaxis": {
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            },
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            }
+          ]
+        }
+      ],
+      "repeat": null,
+      "repeatIteration": null,
+      "repeatRowId": null,
+      "showTitle": true,
+      "title": "Ingestion",
+      "titleSize": "h4"
+    },
+    {
+      "collapse": false,
+      "height": 250,
+      "panels": [
+        {
+          "aliasColors": {},
+          "bars": false,
+          "datasource": null,
+          "fill": 1,
+          "id": 23,
+          "legend": {
+            "avg": false,
+            "current": false,
+            "max": false,
+            "min": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "links": [],
+          "nullPointMode": "null",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [],
+          "span": 4,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "alias": "1 min rate",
+              "from": "_system",
+              "limit": "0",
+              "query": "metric_name='dashbase.indexing.events' AND 'meta.type'='$table' AND partition=$partition",
+              "refId": "A",
+              "target": "ts(minute,avg('metric_data.oneMinuteRate'))",
+              "type": "timeseries"
+            }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeShift": null,
+          "title": "Indexing Rate ($table-p$partition)",
+          "tooltip": {
+            "shared": true,
+            "sort": 0,
+            "value_type": "individual"
+          },
+          "type": "graph",
+          "xaxis": {
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            },
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            }
+          ]
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "datasource": null,
+          "fill": 1,
+          "id": 24,
+          "legend": {
+            "avg": false,
+            "current": false,
+            "max": false,
+            "min": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "links": [],
+          "nullPointMode": "null",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [],
+          "span": 4,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "alias": "avg latency",
+              "from": "_system",
+              "limit": "0",
+              "query": "metric_name='dashbase.indexing.duration' AND metric_type='timer' AND 'meta.type'=$table AND partition=$partition",
+              "refId": "A",
+              "target": "ts($granularity,avg('metric_data.snapshot.mean'))",
+              "type": "timeseries"
+            }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeShift": null,
+          "title": "Avg Indexing Latency ($table-p$partition)",
+          "tooltip": {
+            "shared": true,
+            "sort": 0,
+            "value_type": "individual"
+          },
+          "type": "graph",
+          "xaxis": {
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "format": "ns",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            },
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            }
+          ]
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "datasource": null,
+          "fill": 1,
+          "id": 25,
+          "legend": {
+            "avg": false,
+            "current": false,
+            "max": false,
+            "min": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "links": [],
+          "nullPointMode": "null",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [],
+          "span": 4,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "alias": "latency p99",
+              "from": "_system",
+              "limit": "0",
+              "query": "metric_name='dashbase.indexing.duration' AND 'meta.type'='$table' AND partition=$partition",
+              "refId": "A",
+              "target": "ts($granularity,avg('metric_data.snapshot.percent_99'))",
+              "type": "timeseries"
+            }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeShift": null,
+          "title": "Indexing Latency p99 ($table-p$partition)",
+          "tooltip": {
+            "shared": true,
+            "sort": 0,
+            "value_type": "individual"
+          },
+          "type": "graph",
+          "xaxis": {
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "format": "ns",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            },
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            }
+          ]
+        }
+      ],
+      "repeat": null,
+      "repeatIteration": null,
+      "repeatRowId": null,
+      "showTitle": true,
+      "title": "Indexing Metrics",
+      "titleSize": "h4"
+    },
+    {
+      "collapse": false,
+      "height": 250,
+      "panels": [
+        {
+          "aliasColors": {},
+          "bars": false,
+          "datasource": null,
+          "fill": 1,
+          "id": 26,
           "legend": {
             "avg": false,
             "current": false,
@@ -691,10 +1078,10 @@
           "steppedLine": false,
           "targets": [
             {
-              "alias": "One Minute Average",
+              "alias": "1 minute rate",
               "from": "_system",
-              "limit": "",
-              "query": "metric_name='dashbase.ingestion.event.bytes'",
+              "limit": "0",
+              "query": "metric_name='dashbase.ingestion.parse.error'",
               "refId": "A",
               "target": "ts(minute,avg('metric_data.oneMinuteRate'))",
               "type": "timeseries"
@@ -703,7 +1090,7 @@
           "thresholds": [],
           "timeFrom": null,
           "timeShift": null,
-          "title": "1 min avg(data ingest bytes per sec)",
+          "title": "Parse Error",
           "tooltip": {
             "shared": true,
             "sort": 0,
@@ -718,7 +1105,80 @@
           },
           "yaxes": [
             {
-              "format": "bytes",
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            },
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            }
+          ]
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "datasource": null,
+          "fill": 1,
+          "id": 27,
+          "legend": {
+            "avg": false,
+            "current": false,
+            "max": false,
+            "min": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "links": [],
+          "nullPointMode": "null",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [],
+          "span": 6,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "alias": "1 minute rate",
+              "from": "_system",
+              "limit": "0",
+              "query": "metric_name='dashbase.ingestion.parse.skipped'",
+              "refId": "A",
+              "target": "ts(minute,avg('metric_data.oneMinuteRate'))",
+              "type": "timeseries"
+            }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeShift": null,
+          "title": "Parse Failed",
+          "tooltip": {
+            "shared": true,
+            "sort": 0,
+            "value_type": "individual"
+          },
+          "type": "graph",
+          "xaxis": {
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "format": "short",
               "label": null,
               "logBase": 1,
               "max": null,
@@ -740,7 +1200,7 @@
       "repeatIteration": null,
       "repeatRowId": null,
       "showTitle": true,
-      "title": "Ingestion",
+      "title": "Parsing Anomalies",
       "titleSize": "h4"
     },
     {
@@ -779,7 +1239,7 @@
               "alias": "max query latency",
               "from": "_system",
               "limit": "0",
-              "query": "metric_name='dashbase.search.query.latency' AND metric_type='timer' AND 'meta.type'=$table",
+              "query": "metric_name='dashbase.search.query.latency' AND metric_type='timer' AND 'meta.type'=$table AND partition=$partition",
               "refId": "A",
               "target": "ts($granularity,avg('metric_data.snapshot.max'))",
               "type": "timeseries"
@@ -788,7 +1248,7 @@
           "thresholds": [],
           "timeFrom": null,
           "timeShift": null,
-          "title": "Max Query Latency",
+          "title": "Max Query Latency ($table-p$partition)",
           "tooltip": {
             "shared": true,
             "sort": 0,
@@ -852,7 +1312,7 @@
               "alias": "median latency",
               "from": "_system",
               "limit": "0",
-              "query": "metric_name='dashbase.search.query.latency' AND metric_type='timer' AND 'meta.type'=$table",
+              "query": "metric_name='dashbase.search.query.latency' AND metric_type='timer' AND 'meta.type'=$table AND partition=$partition",
               "refId": "A",
               "target": "ts($granularity,avg('metric_data.snapshot.median'))",
               "type": "timeseries"
@@ -861,7 +1321,7 @@
           "thresholds": [],
           "timeFrom": null,
           "timeShift": null,
-          "title": "Median Query Latency",
+          "title": "Median Query Latency ($table-p$partition)",
           "tooltip": {
             "shared": true,
             "sort": 0,
@@ -925,7 +1385,7 @@
               "alias": "p99 latency",
               "from": "_system",
               "limit": "0",
-              "query": "metric_name='dashbase.search.query.latency' AND metric_type='timer' AND 'meta.type'=$table",
+              "query": "metric_name='dashbase.search.query.latency' AND metric_type='timer' AND 'meta.type'=$table AND partition=$partition",
               "refId": "A",
               "target": "ts($granularity,avg('metric_data.snapshot.percent_99'))",
               "type": "timeseries"
@@ -934,7 +1394,7 @@
           "thresholds": [],
           "timeFrom": null,
           "timeShift": null,
-          "title": "p99 Query Latency",
+          "title": "p99 Query Latency ($table-p$partition)",
           "tooltip": {
             "shared": true,
             "sort": 0,
@@ -998,7 +1458,7 @@
               "alias": "qps 15min rate",
               "from": "_system",
               "limit": "0",
-              "query": "metric_name='dashbase.search.query.latency' AND 'meta.type'=$table",
+              "query": "metric_name='dashbase.search.query.latency' AND 'meta.type'=$table AND partition=$partition",
               "refId": "A",
               "target": "ts($granularity,avg('metric_data.oneMinuteRate'))",
               "type": "timeseries"
@@ -1007,7 +1467,7 @@
           "thresholds": [],
           "timeFrom": null,
           "timeShift": null,
-          "title": "Queries Per Second",
+          "title": "Queries Per Second ($table-p$partition)",
           "tooltip": {
             "shared": true,
             "sort": 0,
@@ -1050,23 +1510,180 @@
     {
       "collapse": false,
       "height": 250,
-      "panels": [],
+      "panels": [
+        {
+          "aliasColors": {},
+          "bars": true,
+          "datasource": null,
+          "fill": 1,
+          "id": 22,
+          "legend": {
+            "avg": false,
+            "current": false,
+            "max": false,
+            "min": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": false,
+          "linewidth": 1,
+          "links": [],
+          "nullPointMode": "null",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [],
+          "span": 12,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "alias": "logs",
+              "from": "_system",
+              "limit": "0",
+              "query": "event_type='log' AND 'meta.type'='$table' AND partition=$partition",
+              "refId": "A",
+              "target": "ts($granularity)",
+              "type": "timeseries"
+            }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeShift": null,
+          "title": "Log Histogram ($table-p$partition)",
+          "tooltip": {
+            "shared": true,
+            "sort": 0,
+            "value_type": "individual"
+          },
+          "type": "graph",
+          "xaxis": {
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            },
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            }
+          ]
+        },
+        {
+          "columns": [],
+          "datasource": null,
+          "filterNull": false,
+          "fontSize": "80%",
+          "id": 21,
+          "links": [],
+          "pageSize": null,
+          "scroll": false,
+          "showHeader": true,
+          "sort": {
+            "col": null,
+            "desc": false
+          },
+          "span": 12,
+          "styles": [
+            {
+              "dateFormat": "MM/DD/YY h:mm:ss a",
+              "pattern": "DATE",
+              "type": "date"
+            },
+            {
+              "colorMode": null,
+              "colors": [
+                "rgba(245, 54, 54, 0.9)",
+                "rgba(237, 129, 40, 0.89)",
+                "rgba(50, 172, 45, 0.97)"
+              ],
+              "decimals": 2,
+              "pattern": "LOG_NAME",
+              "thresholds": [],
+              "type": "string",
+              "unit": "short"
+            },
+            {
+              "colorMode": null,
+              "colors": [
+                "rgba(245, 54, 54, 0.9)",
+                "rgba(237, 129, 40, 0.89)",
+                "rgba(50, 172, 45, 0.97)"
+              ],
+              "dateFormat": "YYYY-MM-DD HH:mm:ss",
+              "decimals": 2,
+              "pattern": "LOG_LEVEL",
+              "thresholds": [],
+              "type": "string",
+              "unit": "short"
+            },
+            {
+              "colorMode": null,
+              "colors": [
+                "rgba(245, 54, 54, 0.9)",
+                "rgba(237, 129, 40, 0.89)",
+                "rgba(50, 172, 45, 0.97)"
+              ],
+              "dateFormat": "YYYY-MM-DD HH:mm:ss",
+              "decimals": 2,
+              "pattern": "HOST",
+              "thresholds": [],
+              "type": "string",
+              "unit": "short"
+            }
+          ],
+          "targets": [
+            {
+              "alias": "",
+              "from": "_system",
+              "limit": "10",
+              "query": "event_type=log AND 'meta.type'='$table' AND partition=$partition",
+              "refId": "A",
+              "target": "log_name,log_level,host",
+              "type": "table"
+            }
+          ],
+          "title": "Logs ($table-p$partition)",
+          "transform": "table",
+          "type": "table"
+        }
+      ],
       "repeat": null,
       "repeatIteration": null,
       "repeatRowId": null,
-      "showTitle": false,
-      "title": "Dashboard Row",
-      "titleSize": "h6"
+      "showTitle": true,
+      "title": "Logs",
+      "titleSize": "h4"
     }
   ],
   "schemaVersion": 14,
   "style": "dark",
+  "tags": [
+    "dashbase-app",
+    "imported"
+  ],
   "templating": {
     "list": [
       {
         "allValue": null,
         "current": {
-          "selected": true,
+          "selected": false,
+          "tags": [],
           "text": "dashbase-node",
           "value": "dashbase-node"
         },
@@ -1116,11 +1733,43 @@
         ],
         "query": "minute,hour",
         "type": "custom"
+      },
+      {
+        "allValue": null,
+        "current": {
+          "tags": [],
+          "text": "0",
+          "value": "0"
+        },
+        "hide": 0,
+        "includeAll": false,
+        "label": null,
+        "multi": false,
+        "name": "partition",
+        "options": [
+          {
+            "selected": true,
+            "text": "0",
+            "value": "0"
+          },
+          {
+            "selected": false,
+            "text": "1",
+            "value": "1"
+          },
+          {
+            "selected": false,
+            "text": "2",
+            "value": "2"
+          }
+        ],
+        "query": "0,1,2",
+        "type": "custom"
       }
     ]
   },
   "time": {
-    "from": "now-3h",
+    "from": "now-15m",
     "to": "now"
   },
   "timepicker": {
@@ -1149,5 +1798,5 @@
     ]
   },
   "timezone": "browser",
-  "version": 28
+  "version": 42
 }
