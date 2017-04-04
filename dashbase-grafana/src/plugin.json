@@ -29,17 +29,17 @@
   "includes": [
     {
       "type": "dashboard",
-      "name": "Dashbase Main",
+      "name": "Query Dashboard",
       "path": "dashboards/main_dashboard.json"
     },
     {
       "type": "dashboard",
-      "name": "Metrics Monitor",
+      "name": "Instance Monitor Dashboard",
       "path": "dashboards/monitor_dashboard.json"
     },
     {
       "type": "datasource",
-      "name": "Dashbase"
+      "name": "Dashbase Datasource"
     }
   ],
   "dependencies": {
