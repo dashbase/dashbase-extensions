@@ -75,7 +75,7 @@
               "alias": "avg('metric_data.number_value')",
               "from": "_system",
               "limit": "0",
-              "query": "metric_name='jvm.cpu.usage.percent' AND 'meta.type'='$table' AND partition=$partition",
+              "query": "metric_name='jvm.cpu.usage.percent' AND type='$type' AND partition=$partition",
               "refId": "A",
               "target": "avg('metric_data.number_value')",
               "type": "timeseries"
@@ -126,7 +126,7 @@
               "alias": "cpu_ts",
               "from": "_system",
               "limit": "0",
-              "query": "metric_name='jvm.cpu.usage.percent' AND 'meta.type'='$table' AND partition=$partition",
+              "query": "metric_name='jvm.cpu.usage.percent' AND type='$type' AND partition=$partition",
               "refId": "A",
               "target": "ts($granularity,avg('metric_data.number_value'))",
               "type": "timeseries"
@@ -211,7 +211,7 @@
               "alias": "used offheap",
               "from": "_system",
               "limit": "0",
-              "query": "metric_name='jvm.memory.non-heap.used' AND 'meta.type'='$table' AND partition=$partition",
+              "query": "metric_name='jvm.memory.non-heap.used' AND type='$type' AND partition=$partition",
               "refId": "A",
               "target": "ts($granularity,avg('metric_data.number_value'))",
               "type": "timeseries"
@@ -284,7 +284,7 @@
               "alias": "used heap",
               "from": "_system",
               "limit": "0",
-              "query": "metric_name='jvm.memory.heap.used' AND 'meta.type'='$table' AND partition=$partition",
+              "query": "metric_name='jvm.memory.heap.used' AND type='$type' AND partition=$partition",
               "refId": "A",
               "target": "ts($granularity,avg('metric_data.number_value'))",
               "type": "timeseries"
@@ -398,12 +398,12 @@
               "limit": "0",
               "query": "metric_name='dashbase.disk.available.bytes.percent'",
               "refId": "A",
-              "target": "avg('metric_data.number_value')",
+              "target": "min('metric_data.number_value')",
               "type": "timeseries"
             }
           ],
           "thresholds": "15",
-          "title": "Disk Percent Available",
+          "title": "Disk Availability Percent",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -524,7 +524,7 @@
               "from": "_system",
               "hide": false,
               "limit": "0",
-              "query": "metric_name='dashbase.disk.available.bytes' AND 'meta.type'='$table'",
+              "query": "metric_name='dashbase.disk.available.bytes' AND type='$type'",
               "refId": "A",
               "target": "ts(minute,avg('metric_data.number_value'))",
               "type": "timeseries"
@@ -619,7 +619,7 @@
               "alias": "One Minute Average",
               "from": "_system",
               "limit": "",
-              "query": "metric_name='dashbase.ingestion.event.bytes' AND 'meta.type'='$table' AND partition=$partition",
+              "query": "metric_name='dashbase.ingestion.event.bytes' AND type='$type' AND partition=$partition",
               "refId": "A",
               "target": "ts(minute,avg('metric_data.oneMinuteRate'))",
               "type": "timeseries"
@@ -692,7 +692,7 @@
               "alias": "One Minute Rate",
               "from": "_system",
               "limit": "0",
-              "query": "metric_name='dashbase.ingestion.events' AND 'meta.type'='$table' AND partition=$partition",
+              "query": "metric_name='dashbase.ingestion.events' AND 'type'='$type' AND partition=$partition",
               "refId": "A",
               "target": "ts($granularity,avg('metric_data.oneMinuteRate'))",
               "type": "timeseries"
@@ -765,7 +765,7 @@
               "alias": "1 minute rate",
               "from": "_system",
               "limit": "0",
-              "query": "metric_name='dashbase.index.timeslice.count' AND 'meta.type'='$table' AND partition=$partition",
+              "query": "metric_name='dashbase.index.timeslice.count' AND type='$type' AND partition=$partition",
               "refId": "A",
               "target": "ts($granularity,avg('metric_data.number_value'))",
               "type": "timeseries"
@@ -850,7 +850,7 @@
               "alias": "1 min rate",
               "from": "_system",
               "limit": "0",
-              "query": "metric_name='dashbase.indexing.events' AND 'meta.type'='$table' AND partition=$partition",
+              "query": "metric_name='dashbase.indexing.events' AND type='$type' AND partition=$partition",
               "refId": "A",
               "target": "ts(minute,avg('metric_data.oneMinuteRate'))",
               "type": "timeseries"
@@ -923,7 +923,7 @@
               "alias": "avg latency",
               "from": "_system",
               "limit": "0",
-              "query": "metric_name='dashbase.indexing.duration' AND metric_type='timer' AND 'meta.type'=$table AND partition=$partition",
+              "query": "metric_name='dashbase.indexing.duration' AND metric_type='timer' AND type=$type AND partition=$partition",
               "refId": "A",
               "target": "ts($granularity,avg('metric_data.snapshot.mean'))",
               "type": "timeseries"
@@ -996,7 +996,7 @@
               "alias": "latency p99",
               "from": "_system",
               "limit": "0",
-              "query": "metric_name='dashbase.indexing.duration' AND 'meta.type'='$table' AND partition=$partition",
+              "query": "metric_name='dashbase.indexing.duration' AND 'meta.type'='$type' AND partition=$partition",
               "refId": "A",
               "target": "ts($granularity,avg('metric_data.snapshot.percent_99'))",
               "type": "timeseries"
@@ -1239,7 +1239,7 @@
               "alias": "max query latency",
               "from": "_system",
               "limit": "0",
-              "query": "metric_name='dashbase.search.query.latency' AND metric_type='timer' AND 'meta.type'=$table AND partition=$partition",
+              "query": "metric_name='dashbase.search.query.latency' AND metric_type='timer' AND type=$type AND partition=$partition",
               "refId": "A",
               "target": "ts($granularity,avg('metric_data.snapshot.max'))",
               "type": "timeseries"
@@ -1312,7 +1312,7 @@
               "alias": "median latency",
               "from": "_system",
               "limit": "0",
-              "query": "metric_name='dashbase.search.query.latency' AND metric_type='timer' AND 'meta.type'=$table AND partition=$partition",
+              "query": "metric_name='dashbase.search.query.latency' AND metric_type='timer' AND type=$type AND partition=$partition",
               "refId": "A",
               "target": "ts($granularity,avg('metric_data.snapshot.median'))",
               "type": "timeseries"
@@ -1385,7 +1385,7 @@
               "alias": "p99 latency",
               "from": "_system",
               "limit": "0",
-              "query": "metric_name='dashbase.search.query.latency' AND metric_type='timer' AND 'meta.type'=$table AND partition=$partition",
+              "query": "metric_name='dashbase.search.query.latency' AND  'type'=$type AND partition=$partition",
               "refId": "A",
               "target": "ts($granularity,avg('metric_data.snapshot.percent_99'))",
               "type": "timeseries"
@@ -1458,7 +1458,7 @@
               "alias": "qps 15min rate",
               "from": "_system",
               "limit": "0",
-              "query": "metric_name='dashbase.search.query.latency' AND 'meta.type'=$table AND partition=$partition",
+              "query": "metric_name='dashbase.search.query.latency' AND type=$type AND partition=$partition",
               "refId": "A",
               "target": "ts($granularity,avg('metric_data.oneMinuteRate'))",
               "type": "timeseries"
@@ -1543,7 +1543,7 @@
               "alias": "logs",
               "from": "_system",
               "limit": "0",
-              "query": "event_type='log' AND 'meta.type'='$table' AND partition=$partition",
+              "query": "event_type='log' AND type='$type' AND partition=$partition",
               "refId": "A",
               "target": "ts($granularity)",
               "type": "timeseries"
@@ -1652,7 +1652,7 @@
               "alias": "",
               "from": "_system",
               "limit": "10",
-              "query": "event_type=log AND 'meta.type'='$table' AND partition=$partition",
+              "query": "event_type=log AND type='$type' AND partition=$partition",
               "refId": "A",
               "target": "log_name,log_level,host",
               "type": "table"
@@ -1679,34 +1679,6 @@
   ],
   "templating": {
     "list": [
-      {
-        "allValue": null,
-        "current": {
-          "selected": false,
-          "tags": [],
-          "text": "dashbase-node",
-          "value": "dashbase-node"
-        },
-        "hide": 0,
-        "includeAll": false,
-        "label": null,
-        "multi": false,
-        "name": "table",
-        "options": [
-          {
-            "selected": true,
-            "text": "dashbase-node",
-            "value": "dashbase-node"
-          },
-          {
-            "selected": false,
-            "text": "dashbase-service",
-            "value": "dashbase-service"
-          }
-        ],
-        "query": "dashbase-node, dashbase-service",
-        "type": "custom"
-      },
       {
         "allValue": null,
         "current": {
@@ -1765,6 +1737,33 @@
         ],
         "query": "0,1,2",
         "type": "custom"
+      },
+      {
+        "allValue": null,
+        "current": {
+          "tags": [],
+          "text": "dashbase-node",
+          "value": "dashbase-node"
+        },
+        "hide": 0,
+        "includeAll": false,
+        "label": null,
+        "multi": false,
+        "name": "type",
+        "options": [
+          {
+            "selected": true,
+            "text": "dashbase-node",
+            "value": "dashbase-node"
+          },
+          {
+            "selected": false,
+            "text": "dashbase-service",
+            "value": "dashbase-service"
+          }
+        ],
+        "query": "dashbase-node,dashbase-service",
+        "type": "custom"
       }
     ]
   },
@@ -1798,5 +1797,5 @@
     ]
   },
   "timezone": "browser",
-  "version": 42
+  "version": 52
 }
