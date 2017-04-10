@@ -2,7 +2,8 @@
 
 VERSION=0.0.1
 
-sudo aws s3 cp s3://dashbase-builds/master/dashbase-grafana-app-$VERSION.tar.gz /var/lib/grafana/plugins/dashbase-grafana.tar.gz
+# if exists, mv the grafana tarball to plugins dir
+sudo mv /home/ec2-user/dashbase-grafana.tar.gz /var/lib/grafana/plugins/
 
 sudo tar -xf /var/lib/grafana/plugins/dashbase-grafana.tar.gz -C /var/lib/grafana/plugins/
 

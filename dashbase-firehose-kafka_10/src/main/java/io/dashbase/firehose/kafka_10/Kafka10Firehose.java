@@ -39,8 +39,8 @@ public class Kafka10Firehose extends RapidFirehose {
   static final int DEFAULT_POLL_INTERVAL_MS = 100;
 
   private KafkaOffset offset = new KafkaOffset();
-  
-  
+
+
 
   private final ObjectMapper mapper = new ObjectMapper();
 
@@ -74,7 +74,7 @@ public class Kafka10Firehose extends RapidFirehose {
   }
 
   public void start() throws Exception {
-    if (this.config.partitions == null || this.config.partitions.isEmpty()) {      
+    if (this.config.partitions == null || this.config.partitions.isEmpty()) {
       this.consumer.subscribe(ImmutableSet.of(config.topic));
     } else {
       this.consumer.assign(config.partitions.stream().map(
@@ -122,10 +122,9 @@ public class Kafka10Firehose extends RapidFirehose {
       metricRegistry.register(key, (Gauge<Double>) () -> entry.getValue().value());
     }
   }
-  
+
   @Override
   public String getName() {
     return "kafka_10";
   }
-
 }
