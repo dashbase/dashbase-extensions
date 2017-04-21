@@ -76,6 +76,8 @@ public class Kafka10Firehose extends RapidFirehose {
 
     @Override
     public void start() throws Exception {
+        ClassLoader cl = Thread.currentThread().getContextClassLoader();
+        Thread.currentThread().setContextClassLoader(this.getClass().getClassLoader());
         Preconditions.checkNotNull(config);
         initConsumer();
 
@@ -93,6 +95,7 @@ public class Kafka10Firehose extends RapidFirehose {
             this.consumer.assign(config.partitions.stream().map(
                     e -> new TopicPartition(config.topic, e.intValue())).collect(Collectors.toList()));
         }
+        Thread.currentThread().setContextClassLoader(cl);
     }
 
     @Override
