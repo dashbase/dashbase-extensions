@@ -4,8 +4,8 @@ import java.io.IOException;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.stream.Collectors;
 import java.util.Properties;
+import java.util.stream.Collectors;
 
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -29,102 +29,107 @@ import rapid.firehose.RapidFirehose;
 
 public class Kafka10Firehose extends RapidFirehose {
 
-  private static final Logger logger = LoggerFactory.getLogger(Kafka10Firehose.class);
+    private static final Logger logger = LoggerFactory.getLogger(Kafka10Firehose.class);
 
-  KafkaFirehoseConfig config;
+    KafkaFirehoseConfig config;
 
-  private Consumer<byte[], byte[]> consumer;
-  private Iterator<ConsumerRecord<byte[], byte[]>> batchIterator = null;
+    protected Consumer<byte[], byte[]> consumer;
+    private Iterator<ConsumerRecord<byte[], byte[]>> batchIterator = null;
 
-  static final int DEFAULT_POLL_INTERVAL_MS = 100;
+    static final int DEFAULT_POLL_INTERVAL_MS = 100;
 
-  private KafkaOffset offset = new KafkaOffset();
+    private KafkaOffset offset = new KafkaOffset();
 
+    private MetricRegistry metricRegistry = null;
 
+    private final ObjectMapper mapper = new ObjectMapper();
 
-  private final ObjectMapper mapper = new ObjectMapper();
-
-  public byte[] doNext() throws IOException {
-    if (batchIterator == null || !batchIterator.hasNext()) {
-      ConsumerRecords<byte[], byte[]> batch;
-      do {
-        if (Thread.currentThread().isInterrupted()) {
-          return null;
+    @Override
+    public byte[] doNext() throws IOException {
+        if (batchIterator == null || !batchIterator.hasNext()) {
+            ConsumerRecords<byte[], byte[]> batch;
+            do {
+                if (Thread.currentThread().isInterrupted()) {
+                    return null;
+                }
+                batch = consumer.poll(config.pollIntervalMs);
+            } while (batch == null || batch.isEmpty());
+            batchIterator = batch.iterator();
         }
-        batch = consumer.poll(config.pollIntervalMs);
-      } while (batch == null || batch.isEmpty());
-      batchIterator = batch.iterator();
+
+        ConsumerRecord<byte[], byte[]> record = batchIterator.next();
+        offset.offsetMap.put(record.partition(), record.offset());
+        return record.value();
     }
 
-    ConsumerRecord<byte[], byte[]> record = batchIterator.next();
-    offset.offsetMap.put(record.partition(), record.offset());
-    return record.value();
-  }
-
-  private static KafkaConsumer<byte[], byte[]> buildConsumer(KafkaFirehoseConfig config) {
-    Properties props = new Properties();
-    props.putAll(config.kafkaProps);
-    props.put("bootstrap.servers", config.hosts);
-    props.put("group.id", config.groupId);
-    props.put("key.deserializer", ByteArrayDeserializer.class.getName());
-    props.put("value.deserializer", ByteArrayDeserializer.class.getName());
-    props.put("enable.auto.commit", "false");
-    KafkaConsumer<byte[], byte[]> consumer = new KafkaConsumer<>(props);
-    return consumer;
-  }
-
-  public void start() throws Exception {
-    if (this.config.partitions == null || this.config.partitions.isEmpty()) {
-      this.consumer.subscribe(ImmutableSet.of(config.topic));
-    } else {
-      this.consumer.assign(config.partitions.stream().map(
-          e -> new TopicPartition(config.topic, e.intValue())).collect(Collectors.toList()));
+    @VisibleForTesting
+    void initConsumer() {
+        Properties props = new Properties();
+        props.putAll(config.kafkaProps);
+        props.put("bootstrap.servers", config.hosts);
+        props.put("group.id", config.groupId);
+        props.put("key.deserializer", ByteArrayDeserializer.class.getName());
+        props.put("value.deserializer", ByteArrayDeserializer.class.getName());
+        props.put("enable.auto.commit", "false");
+        this.consumer = new KafkaConsumer<>(props);
     }
-  }
 
-  public void shutdown() throws Exception {
-    consumer.close();
-  }
+    @Override
+    public void start() throws Exception {
+        Preconditions.checkNotNull(config);
+        initConsumer();
 
-  @VisibleForTesting
-  void setConsumer(Consumer<byte[], byte[]> consumer) {
-    this.consumer = consumer;
-  }
-
-  public void configure(Map<String, Object> params) {
-    logger.info("kafka firehose configuration: " + params);
-    super.configure(params);
-    ObjectMapper mapper = new ObjectMapper();
-    config = mapper.convertValue(params, KafkaFirehoseConfig.class);
-    Preconditions.checkNotNull(config);
-    setConsumer(buildConsumer(config));
-  }
-
-  public void seekToOffset(String offsetString) throws IOException {
-    offset = mapper.readValue(offsetString, KafkaOffset.class);
-    for (Entry<Integer, Long> entry : offset.offsetMap.entrySet()) {
-      TopicPartition topicPartition = new TopicPartition(config.topic, entry.getKey());
-      consumer.seek(topicPartition, entry.getValue() + 1);
+        if (metricRegistry != null) {
+            Map<MetricName, ? extends Metric> metrics = this.consumer.metrics();
+            for (final Entry<MetricName, ? extends Metric> entry : metrics.entrySet()) {
+                MetricName metricName = entry.getKey();
+                String key = "firehose.kafka." + metricName.group() + "." + metricName.name();
+                metricRegistry.register(key, (Gauge<Double>) () -> entry.getValue().value());
+            }
+        }
+        if (this.config.partitions == null || this.config.partitions.isEmpty()) {
+            this.consumer.subscribe(ImmutableSet.of(config.topic));
+        } else {
+            this.consumer.assign(config.partitions.stream().map(
+                    e -> new TopicPartition(config.topic, e.intValue())).collect(Collectors.toList()));
+        }
     }
-  }
 
-  public String getOffset() throws IOException {
-    return mapper.writeValueAsString(offset);
-  }
-
-  @Override
-  public void registerMetrics(MetricRegistry metricRegistry) {
-    super.registerMetrics(metricRegistry);
-    Map<MetricName, ? extends Metric> metrics = this.consumer.metrics();
-    for (final Entry<MetricName, ? extends Metric> entry : metrics.entrySet()) {
-      MetricName metricName = entry.getKey();
-      String key = "firehose.kafka." + metricName.group() + "." + metricName.name();
-      metricRegistry.register(key, (Gauge<Double>) () -> entry.getValue().value());
+    @Override
+    public void shutdown() throws Exception {
+        consumer.close();
     }
-  }
 
-  @Override
-  public String getName() {
-    return "kafka_10";
-  }
+    @Override
+    public void configure(Map<String, Object> params) {
+        logger.info("kafka firehose configuration: " + params);
+        super.configure(params);
+        ObjectMapper mapper = new ObjectMapper();
+        config = mapper.convertValue(params, KafkaFirehoseConfig.class);
+    }
+
+    @Override
+    public void seekToOffset(String offsetString) throws IOException {
+        offset = mapper.readValue(offsetString, KafkaOffset.class);
+        for (Entry<Integer, Long> entry : offset.offsetMap.entrySet()) {
+            TopicPartition topicPartition = new TopicPartition(config.topic, entry.getKey());
+            consumer.seek(topicPartition, entry.getValue() + 1);
+        }
+    }
+
+    @Override
+    public String getOffset() throws IOException {
+        return mapper.writeValueAsString(offset);
+    }
+
+    @Override
+    public void registerMetrics(MetricRegistry metricRegistry) {
+        super.registerMetrics(metricRegistry);
+        this.metricRegistry = metricRegistry;
+    }
+
+    @Override
+    public String getName() {
+        return "kafka_10";
+    }
 }
