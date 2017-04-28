@@ -92,9 +92,13 @@
 	 </repository>
   </repositories>
   <distributionManagement>
-      <repository>
-        <id>dashbase-ftp</id>
-        <url>ftp://enterprise.dashbase.io/var/www/html/maven2</url>
-      </repository>
+	  <snapshotRepository>
+	                <id>repo.dashbase.io</id>
+	                <url>s3://repo.dashbase.io/snapshot</url>
+	            </snapshotRepository>
+	           <repository>
+	                <id>repo.dashbase.io</id>
+	                <url>s3://repo.dashbase.io/release</url>
+	           </repository>
     </distributionManagement>
 </project>

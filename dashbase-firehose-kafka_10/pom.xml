@@ -2,8 +2,13 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+	<dashbase.version>1.0.0-rc1</dashbase.version>
+  </properties>
+  
   <groupId>io.dashbase.extensions</groupId>
-  <version>0.0.1-SNAPSHOT</version>
+  <version>1.0.0-rc1</version>
   <artifactId>dashbase-kafka_10</artifactId>
   <packaging>jar</packaging>
   <name>Dashbase Kafka 0.10 Integration</name>
@@ -65,7 +70,7 @@
     <dependency>
       <groupId>io.dashbase</groupId>
       <artifactId>dashbase-sdk</artifactId>
-      <version>${project.version}</version>
+      <version>${dashbase.version}</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
@@ -97,9 +102,13 @@
      </repository>
   </repositories>
   <distributionManagement>
-      <repository>
-        <id>dashbase-ftp</id>
-        <url>ftp://enterprise.dashbase.io/var/www/html/maven2</url>
-      </repository>
+	  <snapshotRepository>
+	      <id>repo.dashbase.io</id>
+	      <url>s3://repo.dashbase.io/snapshot</url>
+	  </snapshotRepository>
+	 <repository>
+	      <id>repo.dashbase.io</id>
+	      <url>s3://repo.dashbase.io/release</url>
+	 </repository>
     </distributionManagement>
 </project>

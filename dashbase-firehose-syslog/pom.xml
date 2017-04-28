@@ -2,9 +2,15 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
+
+    <properties>
+      <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+  	  <dashbase.version>1.0.0-rc1</dashbase.version>
+    </properties>
+	
     <groupId>io.dashbase.extensions</groupId>
     <artifactId>dashbase-firehose-syslog</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>1.0.0-rc1</version>
     <packaging>jar</packaging>
     <name>Dashbase Firehose Extension as a Syslog server</name>
 
@@ -61,23 +67,21 @@
 		</extensions>
     </build>
 
-    <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    </properties>
     <repositories>
-        <repository>
-            <id>dashbase_maven</id>
-            <url>http://enterprise.dashbase.io:8079/maven2/</url>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
-        </repository>
+    	  <repository>
+    	               <id>repo.dashbase.io</id>
+    	               <url>s3://repo.dashbase.io/release</url>
+    	               <snapshots>
+    	                  <enabled>true</enabled>
+    	                  <updatePolicy>always</updatePolicy>
+    	               </snapshots>
+    	 </repository>
     </repositories>
     <dependencies>
         <dependency>
             <groupId>io.dashbase</groupId>
             <artifactId>dashbase-sdk</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
+            <version>${dashbase-version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
