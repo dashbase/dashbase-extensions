@@ -81,7 +81,7 @@
         <dependency>
             <groupId>io.dashbase</groupId>
             <artifactId>dashbase-sdk</artifactId>
-            <version>${dashbase-version}</version>
+            <version>${dashbase.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -99,13 +99,13 @@
 	
   
     <distributionManagement>
-  	  <repository>
-  	               <id>repo.dashbase.io</id>
-  	               <url>s3://repo.dashbase.io/release</url>
-  	               <snapshots>
-  	                  <enabled>true</enabled>
-  	                  <updatePolicy>always</updatePolicy>
-  	               </snapshots>
+  	  <snapshotRepository>
+  	      <id>repo.dashbase.io</id>
+  	      <url>s3://repo.dashbase.io/snapshot</url>
+  	  </snapshotRepository>
+  	 <repository>
+  	      <id>repo.dashbase.io</id>
+  	      <url>s3://repo.dashbase.io/release</url>
   	 </repository>
     </distributionManagement>
 </project>
