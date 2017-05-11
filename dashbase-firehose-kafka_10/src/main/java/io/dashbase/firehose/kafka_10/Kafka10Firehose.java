@@ -114,6 +114,9 @@ public class Kafka10Firehose extends RapidFirehose {
     @Override
     public void seekToOffset(String offsetString) throws IOException {
         offset = mapper.readValue(offsetString, KafkaOffset.class);
+        // dummy poll, according to:
+        // http://stackoverflow.com/questions/41008610/kafkaconsumer-0-10-java-api-error-message-no-current-assignment-for-partition
+        consumer.poll(10);
         for (Entry<Integer, Long> entry : offset.offsetMap.entrySet()) {
             TopicPartition topicPartition = new TopicPartition(config.topic, entry.getKey());
             consumer.seek(topicPartition, entry.getValue() + 1);
