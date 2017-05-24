@@ -51,6 +51,12 @@
                   implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
                   <resource>reference.conf</resource>
                 </transformer>
+                <transformer
+                  implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
+                <transformer
+                  implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                    <mainClass>io.dashbase.firehose.kafka_10.Kafka10FirehoseRunner</mainClass>
+                </transformer>
               </transformers>
             </configuration>
           </execution>
@@ -71,7 +77,6 @@
       <groupId>io.dashbase</groupId>
       <artifactId>dashbase-sdk</artifactId>
       <version>${dashbase.version}</version>
-      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.apache.kafka</groupId>
@@ -82,7 +87,6 @@
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
       <version>1.7.5</version>
-      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>junit</groupId>
@@ -101,14 +105,4 @@
 	     </snapshots>
      </repository>
   </repositories>
-  <distributionManagement>
-	  <snapshotRepository>
-	      <id>repo.dashbase.io</id>
-	      <url>s3://repo.dashbase.io/snapshot</url>
-	  </snapshotRepository>
-	 <repository>
-	      <id>repo.dashbase.io</id>
-	      <url>s3://repo.dashbase.io/release</url>
-	 </repository>
-    </distributionManagement>
 </project>
