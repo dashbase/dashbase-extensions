@@ -1,4 +1,0 @@
-type: nsq
-params:
-  channel: myChannel
-  topic: myTypic
